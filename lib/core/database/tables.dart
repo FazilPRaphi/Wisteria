@@ -18,7 +18,13 @@ class DoctorProfiles extends Table {
 
   TextColumn get clinicPhoneNumber => text().nullable()();
 
+  TextColumn get email => text().nullable()();
+
   TextColumn get signature => text().nullable()();
+
+  TextColumn get documentPath => text().nullable()();
+
+  TextColumn get documentFileName => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

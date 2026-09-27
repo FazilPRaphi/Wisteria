@@ -74,12 +74,43 @@ class $DoctorProfilesTable extends DoctorProfiles
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _signatureMeta = const VerificationMeta(
     'signature',
   );
   @override
   late final GeneratedColumn<String> signature = GeneratedColumn<String>(
     'signature',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _documentPathMeta = const VerificationMeta(
+    'documentPath',
+  );
+  @override
+  late final GeneratedColumn<String> documentPath = GeneratedColumn<String>(
+    'document_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _documentFileNameMeta = const VerificationMeta(
+    'documentFileName',
+  );
+  @override
+  late final GeneratedColumn<String> documentFileName = GeneratedColumn<String>(
+    'document_file_name',
     aliasedName,
     true,
     type: DriftSqlType.string,
@@ -93,7 +124,10 @@ class $DoctorProfilesTable extends DoctorProfiles
     clinicName,
     clinicAddress,
     clinicPhoneNumber,
+    email,
     signature,
+    documentPath,
+    documentFileName,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -153,10 +187,34 @@ class $DoctorProfilesTable extends DoctorProfiles
         ),
       );
     }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    }
     if (data.containsKey('signature')) {
       context.handle(
         _signatureMeta,
         signature.isAcceptableOrUnknown(data['signature']!, _signatureMeta),
+      );
+    }
+    if (data.containsKey('document_path')) {
+      context.handle(
+        _documentPathMeta,
+        documentPath.isAcceptableOrUnknown(
+          data['document_path']!,
+          _documentPathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('document_file_name')) {
+      context.handle(
+        _documentFileNameMeta,
+        documentFileName.isAcceptableOrUnknown(
+          data['document_file_name']!,
+          _documentFileNameMeta,
+        ),
       );
     }
     return context;
@@ -192,9 +250,21 @@ class $DoctorProfilesTable extends DoctorProfiles
         DriftSqlType.string,
         data['${effectivePrefix}clinic_phone_number'],
       ),
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      ),
       signature: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}signature'],
+      ),
+      documentPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}document_path'],
+      ),
+      documentFileName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}document_file_name'],
       ),
     );
   }
@@ -212,7 +282,10 @@ class DoctorProfile extends DataClass implements Insertable<DoctorProfile> {
   final String? clinicName;
   final String? clinicAddress;
   final String? clinicPhoneNumber;
+  final String? email;
   final String? signature;
+  final String? documentPath;
+  final String? documentFileName;
   const DoctorProfile({
     required this.id,
     required this.doctorName,
@@ -220,7 +293,10 @@ class DoctorProfile extends DataClass implements Insertable<DoctorProfile> {
     this.clinicName,
     this.clinicAddress,
     this.clinicPhoneNumber,
+    this.email,
     this.signature,
+    this.documentPath,
+    this.documentFileName,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -239,8 +315,17 @@ class DoctorProfile extends DataClass implements Insertable<DoctorProfile> {
     if (!nullToAbsent || clinicPhoneNumber != null) {
       map['clinic_phone_number'] = Variable<String>(clinicPhoneNumber);
     }
+    if (!nullToAbsent || email != null) {
+      map['email'] = Variable<String>(email);
+    }
     if (!nullToAbsent || signature != null) {
       map['signature'] = Variable<String>(signature);
+    }
+    if (!nullToAbsent || documentPath != null) {
+      map['document_path'] = Variable<String>(documentPath);
+    }
+    if (!nullToAbsent || documentFileName != null) {
+      map['document_file_name'] = Variable<String>(documentFileName);
     }
     return map;
   }
@@ -261,9 +346,18 @@ class DoctorProfile extends DataClass implements Insertable<DoctorProfile> {
       clinicPhoneNumber: clinicPhoneNumber == null && nullToAbsent
           ? const Value.absent()
           : Value(clinicPhoneNumber),
+      email: email == null && nullToAbsent
+          ? const Value.absent()
+          : Value(email),
       signature: signature == null && nullToAbsent
           ? const Value.absent()
           : Value(signature),
+      documentPath: documentPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(documentPath),
+      documentFileName: documentFileName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(documentFileName),
     );
   }
 
@@ -281,7 +375,10 @@ class DoctorProfile extends DataClass implements Insertable<DoctorProfile> {
       clinicPhoneNumber: serializer.fromJson<String?>(
         json['clinicPhoneNumber'],
       ),
+      email: serializer.fromJson<String?>(json['email']),
       signature: serializer.fromJson<String?>(json['signature']),
+      documentPath: serializer.fromJson<String?>(json['documentPath']),
+      documentFileName: serializer.fromJson<String?>(json['documentFileName']),
     );
   }
   @override
@@ -294,7 +391,10 @@ class DoctorProfile extends DataClass implements Insertable<DoctorProfile> {
       'clinicName': serializer.toJson<String?>(clinicName),
       'clinicAddress': serializer.toJson<String?>(clinicAddress),
       'clinicPhoneNumber': serializer.toJson<String?>(clinicPhoneNumber),
+      'email': serializer.toJson<String?>(email),
       'signature': serializer.toJson<String?>(signature),
+      'documentPath': serializer.toJson<String?>(documentPath),
+      'documentFileName': serializer.toJson<String?>(documentFileName),
     };
   }
 
@@ -305,7 +405,10 @@ class DoctorProfile extends DataClass implements Insertable<DoctorProfile> {
     Value<String?> clinicName = const Value.absent(),
     Value<String?> clinicAddress = const Value.absent(),
     Value<String?> clinicPhoneNumber = const Value.absent(),
+    Value<String?> email = const Value.absent(),
     Value<String?> signature = const Value.absent(),
+    Value<String?> documentPath = const Value.absent(),
+    Value<String?> documentFileName = const Value.absent(),
   }) => DoctorProfile(
     id: id ?? this.id,
     doctorName: doctorName ?? this.doctorName,
@@ -319,7 +422,12 @@ class DoctorProfile extends DataClass implements Insertable<DoctorProfile> {
     clinicPhoneNumber: clinicPhoneNumber.present
         ? clinicPhoneNumber.value
         : this.clinicPhoneNumber,
+    email: email.present ? email.value : this.email,
     signature: signature.present ? signature.value : this.signature,
+    documentPath: documentPath.present ? documentPath.value : this.documentPath,
+    documentFileName: documentFileName.present
+        ? documentFileName.value
+        : this.documentFileName,
   );
   DoctorProfile copyWithCompanion(DoctorProfilesCompanion data) {
     return DoctorProfile(
@@ -339,7 +447,14 @@ class DoctorProfile extends DataClass implements Insertable<DoctorProfile> {
       clinicPhoneNumber: data.clinicPhoneNumber.present
           ? data.clinicPhoneNumber.value
           : this.clinicPhoneNumber,
+      email: data.email.present ? data.email.value : this.email,
       signature: data.signature.present ? data.signature.value : this.signature,
+      documentPath: data.documentPath.present
+          ? data.documentPath.value
+          : this.documentPath,
+      documentFileName: data.documentFileName.present
+          ? data.documentFileName.value
+          : this.documentFileName,
     );
   }
 
@@ -352,7 +467,10 @@ class DoctorProfile extends DataClass implements Insertable<DoctorProfile> {
           ..write('clinicName: $clinicName, ')
           ..write('clinicAddress: $clinicAddress, ')
           ..write('clinicPhoneNumber: $clinicPhoneNumber, ')
-          ..write('signature: $signature')
+          ..write('email: $email, ')
+          ..write('signature: $signature, ')
+          ..write('documentPath: $documentPath, ')
+          ..write('documentFileName: $documentFileName')
           ..write(')'))
         .toString();
   }
@@ -365,7 +483,10 @@ class DoctorProfile extends DataClass implements Insertable<DoctorProfile> {
     clinicName,
     clinicAddress,
     clinicPhoneNumber,
+    email,
     signature,
+    documentPath,
+    documentFileName,
   );
   @override
   bool operator ==(Object other) =>
@@ -377,7 +498,10 @@ class DoctorProfile extends DataClass implements Insertable<DoctorProfile> {
           other.clinicName == this.clinicName &&
           other.clinicAddress == this.clinicAddress &&
           other.clinicPhoneNumber == this.clinicPhoneNumber &&
-          other.signature == this.signature);
+          other.email == this.email &&
+          other.signature == this.signature &&
+          other.documentPath == this.documentPath &&
+          other.documentFileName == this.documentFileName);
 }
 
 class DoctorProfilesCompanion extends UpdateCompanion<DoctorProfile> {
@@ -387,7 +511,10 @@ class DoctorProfilesCompanion extends UpdateCompanion<DoctorProfile> {
   final Value<String?> clinicName;
   final Value<String?> clinicAddress;
   final Value<String?> clinicPhoneNumber;
+  final Value<String?> email;
   final Value<String?> signature;
+  final Value<String?> documentPath;
+  final Value<String?> documentFileName;
   final Value<int> rowid;
   const DoctorProfilesCompanion({
     this.id = const Value.absent(),
@@ -396,7 +523,10 @@ class DoctorProfilesCompanion extends UpdateCompanion<DoctorProfile> {
     this.clinicName = const Value.absent(),
     this.clinicAddress = const Value.absent(),
     this.clinicPhoneNumber = const Value.absent(),
+    this.email = const Value.absent(),
     this.signature = const Value.absent(),
+    this.documentPath = const Value.absent(),
+    this.documentFileName = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DoctorProfilesCompanion.insert({
@@ -406,7 +536,10 @@ class DoctorProfilesCompanion extends UpdateCompanion<DoctorProfile> {
     this.clinicName = const Value.absent(),
     this.clinicAddress = const Value.absent(),
     this.clinicPhoneNumber = const Value.absent(),
+    this.email = const Value.absent(),
     this.signature = const Value.absent(),
+    this.documentPath = const Value.absent(),
+    this.documentFileName = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        doctorName = Value(doctorName);
@@ -417,7 +550,10 @@ class DoctorProfilesCompanion extends UpdateCompanion<DoctorProfile> {
     Expression<String>? clinicName,
     Expression<String>? clinicAddress,
     Expression<String>? clinicPhoneNumber,
+    Expression<String>? email,
     Expression<String>? signature,
+    Expression<String>? documentPath,
+    Expression<String>? documentFileName,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -427,7 +563,10 @@ class DoctorProfilesCompanion extends UpdateCompanion<DoctorProfile> {
       if (clinicName != null) 'clinic_name': clinicName,
       if (clinicAddress != null) 'clinic_address': clinicAddress,
       if (clinicPhoneNumber != null) 'clinic_phone_number': clinicPhoneNumber,
+      if (email != null) 'email': email,
       if (signature != null) 'signature': signature,
+      if (documentPath != null) 'document_path': documentPath,
+      if (documentFileName != null) 'document_file_name': documentFileName,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -439,7 +578,10 @@ class DoctorProfilesCompanion extends UpdateCompanion<DoctorProfile> {
     Value<String?>? clinicName,
     Value<String?>? clinicAddress,
     Value<String?>? clinicPhoneNumber,
+    Value<String?>? email,
     Value<String?>? signature,
+    Value<String?>? documentPath,
+    Value<String?>? documentFileName,
     Value<int>? rowid,
   }) {
     return DoctorProfilesCompanion(
@@ -449,7 +591,10 @@ class DoctorProfilesCompanion extends UpdateCompanion<DoctorProfile> {
       clinicName: clinicName ?? this.clinicName,
       clinicAddress: clinicAddress ?? this.clinicAddress,
       clinicPhoneNumber: clinicPhoneNumber ?? this.clinicPhoneNumber,
+      email: email ?? this.email,
       signature: signature ?? this.signature,
+      documentPath: documentPath ?? this.documentPath,
+      documentFileName: documentFileName ?? this.documentFileName,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -475,8 +620,17 @@ class DoctorProfilesCompanion extends UpdateCompanion<DoctorProfile> {
     if (clinicPhoneNumber.present) {
       map['clinic_phone_number'] = Variable<String>(clinicPhoneNumber.value);
     }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
     if (signature.present) {
       map['signature'] = Variable<String>(signature.value);
+    }
+    if (documentPath.present) {
+      map['document_path'] = Variable<String>(documentPath.value);
+    }
+    if (documentFileName.present) {
+      map['document_file_name'] = Variable<String>(documentFileName.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -493,7 +647,10 @@ class DoctorProfilesCompanion extends UpdateCompanion<DoctorProfile> {
           ..write('clinicName: $clinicName, ')
           ..write('clinicAddress: $clinicAddress, ')
           ..write('clinicPhoneNumber: $clinicPhoneNumber, ')
+          ..write('email: $email, ')
           ..write('signature: $signature, ')
+          ..write('documentPath: $documentPath, ')
+          ..write('documentFileName: $documentFileName, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -7978,7 +8135,10 @@ typedef $$DoctorProfilesTableCreateCompanionBuilder =
       Value<String?> clinicName,
       Value<String?> clinicAddress,
       Value<String?> clinicPhoneNumber,
+      Value<String?> email,
       Value<String?> signature,
+      Value<String?> documentPath,
+      Value<String?> documentFileName,
       Value<int> rowid,
     });
 typedef $$DoctorProfilesTableUpdateCompanionBuilder =
@@ -7989,7 +8149,10 @@ typedef $$DoctorProfilesTableUpdateCompanionBuilder =
       Value<String?> clinicName,
       Value<String?> clinicAddress,
       Value<String?> clinicPhoneNumber,
+      Value<String?> email,
       Value<String?> signature,
+      Value<String?> documentPath,
+      Value<String?> documentFileName,
       Value<int> rowid,
     });
 
@@ -8032,8 +8195,23 @@ class $$DoctorProfilesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get signature => $composableBuilder(
     column: $table.signature,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get documentPath => $composableBuilder(
+    column: $table.documentPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get documentFileName => $composableBuilder(
+    column: $table.documentFileName,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -8077,8 +8255,23 @@ class $$DoctorProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get signature => $composableBuilder(
     column: $table.signature,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get documentPath => $composableBuilder(
+    column: $table.documentPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get documentFileName => $composableBuilder(
+    column: $table.documentFileName,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -8120,8 +8313,21 @@ class $$DoctorProfilesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
   GeneratedColumn<String> get signature =>
       $composableBuilder(column: $table.signature, builder: (column) => column);
+
+  GeneratedColumn<String> get documentPath => $composableBuilder(
+    column: $table.documentPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get documentFileName => $composableBuilder(
+    column: $table.documentFileName,
+    builder: (column) => column,
+  );
 }
 
 class $$DoctorProfilesTableTableManager
@@ -8167,7 +8373,10 @@ class $$DoctorProfilesTableTableManager
                 Value<String?> clinicName = const Value.absent(),
                 Value<String?> clinicAddress = const Value.absent(),
                 Value<String?> clinicPhoneNumber = const Value.absent(),
+                Value<String?> email = const Value.absent(),
                 Value<String?> signature = const Value.absent(),
+                Value<String?> documentPath = const Value.absent(),
+                Value<String?> documentFileName = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DoctorProfilesCompanion(
                 id: id,
@@ -8176,7 +8385,10 @@ class $$DoctorProfilesTableTableManager
                 clinicName: clinicName,
                 clinicAddress: clinicAddress,
                 clinicPhoneNumber: clinicPhoneNumber,
+                email: email,
                 signature: signature,
+                documentPath: documentPath,
+                documentFileName: documentFileName,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -8187,7 +8399,10 @@ class $$DoctorProfilesTableTableManager
                 Value<String?> clinicName = const Value.absent(),
                 Value<String?> clinicAddress = const Value.absent(),
                 Value<String?> clinicPhoneNumber = const Value.absent(),
+                Value<String?> email = const Value.absent(),
                 Value<String?> signature = const Value.absent(),
+                Value<String?> documentPath = const Value.absent(),
+                Value<String?> documentFileName = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DoctorProfilesCompanion.insert(
                 id: id,
@@ -8196,7 +8411,10 @@ class $$DoctorProfilesTableTableManager
                 clinicName: clinicName,
                 clinicAddress: clinicAddress,
                 clinicPhoneNumber: clinicPhoneNumber,
+                email: email,
                 signature: signature,
+                documentPath: documentPath,
+                documentFileName: documentFileName,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

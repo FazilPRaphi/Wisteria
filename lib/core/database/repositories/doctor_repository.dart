@@ -18,7 +18,10 @@ class DoctorRepository {
     String? clinicName,
     String? clinicAddress,
     String? clinicPhoneNumber,
+    String? email,
     String? signature,
+    String? documentPath,
+    String? documentFileName,
   }) async {
     final existing = await getProfile();
 
@@ -29,7 +32,10 @@ class DoctorRepository {
       clinicName: Value(clinicName),
       clinicAddress: Value(clinicAddress),
       clinicPhoneNumber: Value(clinicPhoneNumber),
+      email: Value(email),
       signature: Value(signature),
+      documentPath: Value(documentPath),
+      documentFileName: Value(documentFileName),
     );
 
     if (existing == null) {

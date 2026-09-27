@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-
+import '../examinations/create_examination_page.dart';
 import '../../core/database/database.dart';
 import '../../core/database/repositories/patient_repository.dart';
 import '../../core/theme/wisteria_theme.dart';
 import '../shared/wisteria_back_button.dart';
+import '../../core/database/repositories/examination_repository.dart';
+
+import '../examinations/examination_details_page.dart';
 
 class PatientDetailsPage extends StatefulWidget {
   final WisteriaDatabase database;
@@ -22,18 +25,22 @@ class PatientDetailsPage extends StatefulWidget {
 
 class _PatientDetailsPageState
     extends State<PatientDetailsPage> {
-  late final PatientRepository _patientRepository;
+ late final PatientRepository _patientRepository;
+late final ExaminationRepository _examinationRepository;
 
-  Patient? _patient;
-  bool _isLoading = true;
+Patient? _patient;
+List<Examination> _examinations = [];
 
+bool _isLoading = true;
   @override
   void initState() {
     super.initState();
 
     _patientRepository = PatientRepository(widget.database);
+_examinationRepository = ExaminationRepository(widget.database);
 
-    _loadPatient();
+_loadPatient();
+_loadExaminations();
   }
 
   Future<void> _loadPatient() async {
@@ -47,6 +54,37 @@ class _PatientDetailsPageState
       _isLoading = false;
     });
   }
+
+  Future<void> _loadExaminations() async {
+  final examinations =
+      await _examinationRepository.getExaminationsForPatient(
+    widget.patientId,
+  );
+
+  if (!mounted) return;
+
+  setState(() {
+    _examinations = examinations;
+  });
+}
+String _formatDateTime(DateTime dateTime) {
+  final day = dateTime.day.toString().padLeft(2, '0');
+  final month = dateTime.month.toString().padLeft(2, '0');
+  final year = dateTime.year.toString();
+
+  final hour = dateTime.hour == 0
+      ? 12
+      : dateTime.hour > 12
+          ? dateTime.hour - 12
+          : dateTime.hour;
+
+  final minute =
+      dateTime.minute.toString().padLeft(2, '0');
+
+  final period = dateTime.hour >= 12 ? 'PM' : 'AM';
+
+  return '$day/$month/$year • $hour:$minute $period';
+}
 
   Future<void> _editPatient() async {
     final patient = _patient;
@@ -456,16 +494,7 @@ class _PatientDetailsPageState
 
                         const SizedBox(height: 20),
 
-                        _buildSection(
-                          title: 'Examinations',
-                          icon: Icons.medical_information_outlined,
-                          children: const [
-                            _EmptySectionContent(
-                              message:
-                                  'No examinations yet.',
-                            ),
-                          ],
-                        ),
+                        _buildExaminationsSection(patient),
 
                         const SizedBox(height: 48),
                       ],
@@ -536,6 +565,169 @@ class _PatientDetailsPageState
       ],
     );
   }
+
+ Widget _buildExaminationsSection(Patient patient) {
+  return _buildSection(
+    title: 'Examinations',
+    icon: Icons.medical_information_outlined,
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Clinical examinations',
+            style: TextStyle(
+              fontSize: 13,
+              color: WisteriaColors.textSecondary,
+            ),
+          ),
+
+          FilledButton.icon(
+            onPressed: () async {
+              final created = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CreateExaminationPage(
+                    database: widget.database,
+                    patientId: patient.id,
+                  ),
+                ),
+              );
+
+              if (created == true && mounted) {
+                await _loadExaminations();
+              }
+            },
+            icon: const Icon(
+              Icons.add,
+              size: 18,
+            ),
+            label: const Text('Create Examination'),
+          ),
+        ],
+      ),
+
+      const SizedBox(height: 20),
+
+      if (_examinations.isEmpty)
+        const _EmptySectionContent(
+          message: 'No examinations yet.',
+        )
+      else
+        ..._examinations.map(
+          (examination) =>
+              _buildExaminationItem(examination),
+        ),
+    ],
+  );
+}
+
+Widget _buildExaminationItem(
+  Examination examination,
+) {
+  return InkWell(
+    borderRadius: BorderRadius.circular(
+      WisteriaRadius.md,
+    ),
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ExaminationDetailsPage(
+            database: widget.database,
+            examinationId: examination.id,
+          ),
+        ),
+      );
+    },
+  child: Container(
+    margin: const EdgeInsets.only(bottom: 12),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: WisteriaColors.background,
+      borderRadius: BorderRadius.circular(
+        WisteriaRadius.md,
+      ),
+      border: Border.all(
+        color: WisteriaColors.border,
+      ),
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: WisteriaColors.primary.withValues(
+              alpha: 0.10,
+            ),
+            borderRadius: BorderRadius.circular(
+              WisteriaRadius.sm,
+            ),
+          ),
+          child: const Icon(
+            Icons.medical_information_outlined,
+            color: WisteriaColors.primary,
+          ),
+        ),
+
+        const SizedBox(width: 16),
+
+        Expanded(
+          child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+            children: [
+              Text(
+                examination.examinationType,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: WisteriaColors.textPrimary,
+                ),
+              ),
+
+              const SizedBox(height: 5),
+
+              Text(
+                _formatDateTime(
+                  examination.examinationDate,
+                ),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: WisteriaColors.textMuted,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 5,
+          ),
+          decoration: BoxDecoration(
+            color: WisteriaColors.primary.withValues(
+              alpha: 0.10,
+            ),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            examination.status,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: WisteriaColors.primary,
+            ),
+          ),
+        ),
+      ],
+    ),
+  ),
+  );
+}
+
 
   Widget _buildSection({
     required String title,

@@ -224,14 +224,15 @@ class _WisteriaDashboardCardState extends State<WisteriaDashboardCard>
         ),
       ),
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        child: Icon(
-          widget.data.icon,
-          key: ValueKey(_isHovered),
-          color: _isHovered ? accent : accent.withValues(alpha: 0.8),
-          size: widget.data.isHero ? 28 : 24,
-        ),
-      ),
+  duration: const Duration(milliseconds: 200),
+  child: Icon(
+    widget.data.icon,
+    color: _isHovered
+        ? accent
+        : accent.withValues(alpha: 0.8),
+    size: widget.data.isHero ? 28 : 24,
+  ),
+),
     );
   }
 }
