@@ -8,6 +8,9 @@ import '../../core/database/repositories/medical_image_repository.dart';
 import '../../core/storage/medical_image_storage.dart';
 import '../../core/theme/wisteria_theme.dart';
 import '../shared/wisteria_back_button.dart';
+import '../../core/database/repositories/medical_model_repository.dart';
+import '../../core/database/repositories/model_run_repository.dart';
+import '../../core/services/onnx_inference_service.dart';
 
 class ExaminationDetailsPage extends StatefulWidget {
   final WisteriaDatabase database;
@@ -27,7 +30,18 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
   late final ExaminationRepository _repository;
   late final MedicalImageRepository _imageRepository;
   late final MedicalImageStorage _imageStorage;
+  late final MedicalModelRepository _modelRepository;
+  late final ModelRunRepository _modelRunRepository;
 
+  List<_InstalledModelChoice> _installedModels = [];
+  List<_SavedInference> _savedInferences = [];
+
+  String? _selectedImageId;
+  String? _selectedModelVersionId;
+
+  bool _isLoadingInferenceData = true;
+  bool _isRunningInference = false;
+  String? _inferenceError;
   Examination? _examination;
   List<MedicalImage> _medicalImages = [];
   bool _isLoading = true;
@@ -39,9 +53,11 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
     _repository = ExaminationRepository(widget.database);
     _imageRepository = MedicalImageRepository(widget.database);
     _imageStorage = MedicalImageStorage();
-
+    _modelRepository = MedicalModelRepository(widget.database);
+    _modelRunRepository = ModelRunRepository(widget.database);
     _loadExamination();
     _loadMedicalImages();
+    _loadInferenceData();
   }
 
   Future<void> _loadExamination() async {
@@ -135,6 +151,78 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
           _isAddingImage = false;
         });
       }
+    }
+  }
+
+  Future<void> _loadInferenceData() async {
+    try {
+      final models = await _modelRepository.getAllModels();
+      final choices = <_InstalledModelChoice>[];
+
+      for (final model in models) {
+        final version = await _modelRepository.getInstalledVersion(model.id);
+
+        if (version == null) continue;
+
+        // This production cycle supports the bundled pneumonia model only.
+        final registeredPath = version.filePath.trim().replaceAll(r'\', '/');
+
+        if (registeredPath != OnnxInferenceService.modelAsset) {
+          continue;
+        }
+
+        choices.add(_InstalledModelChoice(model: model, version: version));
+      }
+
+      final runs = await _modelRunRepository.getRunsForExamination(
+        widget.examinationId,
+      );
+
+      final saved = <_SavedInference>[];
+
+      for (final run in runs) {
+        final result = await _modelRunRepository.getResultForRun(run.id);
+
+        if (result == null) continue;
+
+        final findings = await _modelRunRepository.getFindingsForResult(
+          result.id,
+        );
+
+        final model = await _modelRepository.getModelById(run.modelId);
+
+        saved.add(
+          _SavedInference(
+            run: run,
+            result: result,
+            findings: findings,
+            modelName: model?.name ?? 'Unknown model',
+          ),
+        );
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _installedModels = choices;
+        _savedInferences = saved;
+
+        if (_selectedModelVersionId != null &&
+            !choices.any(
+              (choice) => choice.version.id == _selectedModelVersionId,
+            )) {
+          _selectedModelVersionId = null;
+        }
+
+        _isLoadingInferenceData = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _inferenceError = 'Could not load inference data: $e';
+        _isLoadingInferenceData = false;
+      });
     }
   }
 
@@ -596,4 +684,25 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
 
     return '$day/$month/$year • $hour:$minute $period';
   }
+}
+
+class _InstalledModelChoice {
+  final MedicalModel model;
+  final ModelVersion version;
+
+  const _InstalledModelChoice({required this.model, required this.version});
+}
+
+class _SavedInference {
+  final ModelRun run;
+  final ModelRunResult result;
+  final List<ModelFinding> findings;
+  final String modelName;
+
+  const _SavedInference({
+    required this.run,
+    required this.result,
+    required this.findings,
+    required this.modelName,
+  });
 }

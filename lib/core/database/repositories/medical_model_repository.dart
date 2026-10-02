@@ -40,6 +40,28 @@ class MedicalModelRepository {
       database.modelVersions,
     )..where((version) => version.modelId.equals(modelId))).get();
   }
+  
+  Future<MedicalModel?> getModelById(String id) {
+    return (database.select(database.medicalModels)
+          ..where((model) => model.id.equals(id)))
+        .getSingleOrNull();
+  }
+
+  Future<ModelVersion?> getVersionById(String id) {
+    return (database.select(database.modelVersions)
+          ..where((version) => version.id.equals(id)))
+        .getSingleOrNull();
+  }
+
+  Future<ModelVersion?> getInstalledVersion(String modelId) {
+    return (database.select(database.modelVersions)
+          ..where(
+            (version) =>
+                version.modelId.equals(modelId) &
+                version.installationStatus.equals('INSTALLED'),
+          ))
+        .getSingleOrNull();
+  }
 
   Future<void> registerVersion({
     required String id,
