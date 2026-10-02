@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
-import 'features/models/medical_model_page.dart';
 import 'core/database/database.dart';
-import 'core/theme/wisteria_theme.dart';
-import 'features/dashboard/dashboard_page.dart';
-import 'features/doctor/doctor_profile_page.dart';
-import 'features/patients/patient_page.dart';
-import 'features/shared/placeholder_page.dart';
-import 'features/models/model_inference_test_page.dart';
+import 'features/workspace/workspace_shell.dart';
 
 class WisteriaAppShell extends StatelessWidget {
   final WisteriaDatabase database;
@@ -15,90 +9,6 @@ class WisteriaAppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DashboardPage(onNavigate: (page) => _navigateTo(context, page));
-  }
-
-  void _navigateTo(BuildContext context, String page) {
-    final Widget targetPage;
-
-    switch (page) {
-      case 'profile':
-        targetPage = DoctorProfilePage(database: database);
-        break;
-
-      case 'patients':
-        targetPage = PatientPage(database: database);
-        break;
-
-      case 'history':
-        targetPage = const PlaceholderPage(
-          title: 'Examination History',
-          subtitle: 'Review past examinations, scans, and diagnostic sessions.',
-          icon: Icons.history_rounded,
-        );
-        break;
-
-      case 'models':
-        targetPage = MedicalModelPage(database: database);
-        break;
-
-      case 'sync':
-        targetPage = const PlaceholderPage(
-          title: 'Data Synchronization',
-          subtitle: 'Synchronize clinical data across your workstations.',
-          icon: Icons.sync_rounded,
-        );
-        break;
-
-      case 'ai':
-        targetPage = const PlaceholderPage(
-          title: 'AI Workspace',
-          subtitle: 'Run AI analyses and review diagnostic results.',
-          icon: Icons.auto_awesome_rounded,
-          accentColor: WisteriaColors.tertiary,
-        );
-        break;
-
-      case 'analytics':
-        targetPage = const PlaceholderPage(
-          title: 'Clinical Analytics',
-          subtitle:
-              'View clinical analytics, throughput metrics, and insights.',
-          icon: Icons.analytics_rounded,
-        );
-        break;
-
-      case 'more_models':
-        targetPage = const PlaceholderPage(
-          title: 'Model Registry',
-          subtitle: 'Browse and download available AI models.',
-          icon: Icons.download_rounded,
-        );
-        break;
-
-      case 'test_model':
-        targetPage = const ModelInferenceTestPage();
-        break;
-
-      default:
-        return;
-    }
-
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => targetPage,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-            ),
-            child: child,
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 220),
-        reverseTransitionDuration: const Duration(milliseconds: 180),
-      ),
-    );
+    return WorkspaceShell(database: database);
   }
 }

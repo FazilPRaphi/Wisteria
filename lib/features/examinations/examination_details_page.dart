@@ -226,6 +226,79 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
     }
   }
 
+  Future<void> _runInference() async {
+    if (_selectedImageId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a medical image first')),
+      );
+      return;
+    }
+
+    final choice = _installedModels.isNotEmpty ? _installedModels.first : null;
+    if (choice == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No installed model available')),
+      );
+      return;
+    }
+
+    final image = _medicalImages.firstWhere(
+      (img) => img.id == _selectedImageId,
+    );
+
+    setState(() {
+      _isRunningInference = true;
+      _inferenceError = null;
+    });
+
+    try {
+      final service = OnnxInferenceService.instance;
+      await service.initialize();
+
+      final result = await service.analyzeImage(File(image.filePath));
+
+      // Save to database
+      final runId = const Uuid().v4();
+      final resultId = const Uuid().v4();
+      final findingId = const Uuid().v4();
+
+      await _modelRunRepository.saveSuccessfulRun(
+        runId: runId,
+        resultId: resultId,
+        findingId: findingId,
+        examinationId: widget.examinationId,
+        modelId: choice.model.id,
+        modelVersionId: choice.version.id,
+        inputImageId: image.id,
+        inputImageDate: image.clinicalDate,
+        executionTimestamp: result.executedAt,
+        prediction: result.prediction,
+        confidence: result.confidence,
+        normalProbability: result.normalProbability,
+        pneumoniaProbability: result.pneumoniaProbability,
+      );
+
+      await _loadInferenceData();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Inference completed and saved')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _inferenceError = 'Inference failed: $e';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isRunningInference = false;
+        });
+      }
+    }
+  }
+
   Future<void> _deleteMedicalImage(MedicalImage image) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -501,19 +574,8 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
 
                         const SizedBox(height: 20),
 
-                        _buildSection(
-                          title: 'AI Analysis',
-                          icon: Icons.auto_awesome_outlined,
-                          children: const [
-                            Text(
-                              'AI inference will be added in a later stage.',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: WisteriaColors.textMuted,
-                              ),
-                            ),
-                          ],
-                        ),
+                        // ── AI Inference Section ──
+                        _buildAIInferenceSection(),
 
                         const SizedBox(height: 48),
                       ],
@@ -524,6 +586,389 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAIInferenceSection() {
+    return _buildSection(
+      title: 'AI Analysis',
+      icon: Icons.auto_awesome_outlined,
+      children: [
+        // ── Disclaimer ──
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          margin: const EdgeInsets.only(bottom: 20),
+          decoration: BoxDecoration(
+            color: WisteriaColors.warning.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+            border: Border.all(
+              color: WisteriaColors.warning.withValues(alpha: 0.15),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.info_outline_rounded,
+                size: 18,
+                color: WisteriaColors.warning.withValues(alpha: 0.7),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'AI-generated assistance only. Model output is not a definitive medical diagnosis and must be reviewed by a qualified clinician.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: WisteriaColors.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        if (_isLoadingInferenceData)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: CircularProgressIndicator(color: WisteriaColors.primary),
+            ),
+          )
+        else ...[
+          // ── Run New Inference ──
+          if (_medicalImages.isNotEmpty && _installedModels.isNotEmpty) ...[
+            const Text(
+              'Run Inference',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: WisteriaColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Image selector
+            InputDecorator(
+              decoration: const InputDecoration(
+                labelText: 'Select Image',
+                border: OutlineInputBorder(),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedImageId,
+                  isExpanded: true,
+                  isDense: true,
+                  dropdownColor: WisteriaColors.surfaceContainer,
+                  hint: const Text(
+                    'Choose an image',
+                    style: TextStyle(color: WisteriaColors.textMuted),
+                  ),
+                  items: _medicalImages
+                      .map(
+                        (img) => DropdownMenuItem(
+                          value: img.id,
+                          child: Text(
+                            '${img.originalFileName} (${img.modality})',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() => _selectedImageId = value);
+                  },
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Model info
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: WisteriaColors.surfaceContainer,
+                borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+                border: Border.all(color: WisteriaColors.border),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.memory_rounded,
+                    size: 18,
+                    color: WisteriaColors.primary,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _installedModels.first.model.name,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: WisteriaColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${_installedModels.first.model.task} • ${_installedModels.first.model.modality} • v${_installedModels.first.version.version}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: WisteriaColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: WisteriaColors.success.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'LOCAL',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: WisteriaColors.success,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Run button
+            FilledButton.icon(
+              onPressed: _isRunningInference || _selectedImageId == null
+                  ? null
+                  : _runInference,
+              icon: _isRunningInference
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: WisteriaColors.textOnPrimary,
+                      ),
+                    )
+                  : const Icon(Icons.play_arrow_rounded, size: 20),
+              label: Text(
+                _isRunningInference
+                    ? 'Running inference...'
+                    : 'Run Pneumonia Classification',
+              ),
+            ),
+
+            if (_isRunningInference) ...[
+              const SizedBox(height: 12),
+              const LinearProgressIndicator(
+                color: WisteriaColors.primary,
+                backgroundColor: WisteriaColors.surfaceHigh,
+              ),
+            ],
+
+            if (_inferenceError != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: WisteriaColors.error.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+                  border: Border.all(
+                    color: WisteriaColors.error.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Text(
+                  _inferenceError!,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: WisteriaColors.error,
+                  ),
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 24),
+          ] else if (_medicalImages.isEmpty) ...[
+            const Text(
+              'Add a medical image to run AI inference.',
+              style: TextStyle(fontSize: 13, color: WisteriaColors.textMuted),
+            ),
+            const SizedBox(height: 20),
+          ] else if (_installedModels.isEmpty) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: WisteriaColors.surfaceContainer,
+                borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+                border: Border.all(color: WisteriaColors.border),
+              ),
+              child: const Column(
+                children: [
+                  Icon(
+                    Icons.memory_rounded,
+                    size: 28,
+                    color: WisteriaColors.textMuted,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'No local model available',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: WisteriaColors.textSecondary,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Register the pneumonia model in Doctor & System → Models to enable AI inference.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: WisteriaColors.textMuted,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+
+          // ── Saved Results ──
+          if (_savedInferences.isNotEmpty) ...[
+            const Text(
+              'Saved Results',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: WisteriaColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ..._savedInferences.map(_buildSavedInferenceCard),
+          ],
+        ],
+      ],
+    );
+  }
+
+  Widget _buildSavedInferenceCard(_SavedInference inference) {
+    final finding = inference.findings.isNotEmpty
+        ? inference.findings.first
+        : null;
+
+    final prediction = finding?.value ?? 'Unknown';
+    final confidence = finding?.confidence != null
+        ? double.tryParse(finding!.confidence!)
+        : null;
+
+    final isPneumonia = prediction.toUpperCase() == 'PNEUMONIA';
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: WisteriaColors.background,
+        borderRadius: BorderRadius.circular(WisteriaRadius.md),
+        border: Border.all(color: WisteriaColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: isPneumonia
+                      ? WisteriaColors.warning.withValues(alpha: 0.10)
+                      : WisteriaColors.success.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+                ),
+                child: Icon(
+                  isPneumonia
+                      ? Icons.warning_amber_rounded
+                      : Icons.check_circle_outline_rounded,
+                  color: isPneumonia
+                      ? WisteriaColors.warning
+                      : WisteriaColors.success,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      prediction,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: isPneumonia
+                            ? WisteriaColors.warning
+                            : WisteriaColors.success,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Model: ${inference.modelName}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: WisteriaColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (confidence != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: WisteriaColors.surfaceContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${(confidence * 100).toStringAsFixed(1)}%',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: WisteriaColors.textPrimary,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _formatDateTime(inference.run.executionTimestamp),
+            style: const TextStyle(
+              fontSize: 11,
+              color: WisteriaColors.textMuted,
+            ),
+          ),
+        ],
       ),
     );
   }

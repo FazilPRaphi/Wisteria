@@ -56,4 +56,22 @@ class ExaminationRepository {
 
     return updatedRows > 0;
   }
+
+  Future<bool> updateExamination({
+    required String examinationId,
+    String? doctorNotes,
+    String? status,
+  }) async {
+    final companion = ExaminationsCompanion(
+      doctorNotes: doctorNotes != null ? Value(doctorNotes) : const Value.absent(),
+      status: status != null ? Value(status) : const Value.absent(),
+    );
+
+    final updatedRows =
+        await (database.update(database.examinations)
+              ..where((examination) => examination.id.equals(examinationId)))
+            .write(companion);
+
+    return updatedRows > 0;
+  }
 }

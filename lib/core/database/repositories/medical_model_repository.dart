@@ -86,4 +86,45 @@ class MedicalModelRepository {
           ),
         );
   }
+
+  /// Ensures the bundled pneumonia model and its installed version
+  /// exist in the database. Returns (modelId, versionId).
+  ///
+  /// This is idempotent — if the records already exist, it returns
+  /// the existing IDs without creating duplicates.
+  static const String bundledModelId = 'wisteria-pneumonia-resnet18';
+  static const String bundledVersionId = 'wisteria-pneumonia-resnet18-v1';
+
+  Future<({String modelId, String versionId})> ensureBundledPneumoniaModel() async {
+    // Check if model already exists.
+    final existingModel = await getModelById(bundledModelId);
+
+    if (existingModel == null) {
+      await createModel(
+        id: bundledModelId,
+        name: 'Pneumonia ResNet18',
+        description: 'Binary classification of chest X-ray images for pneumonia detection. Locally bundled ONNX model.',
+        task: 'Pneumonia Classification',
+        modality: 'X-Ray',
+        runtime: 'ONNX Runtime',
+      );
+    }
+
+    // Check if version already exists.
+    final existingVersion = await getVersionById(bundledVersionId);
+
+    if (existingVersion == null) {
+      await registerVersion(
+        id: bundledVersionId,
+        modelId: bundledModelId,
+        version: '1.0.0',
+        filePath: 'assets/models/pneumonia_resnet18.onnx',
+        checksum: 'bundled',
+        compatibility: 'Wisteria 1.0',
+        installationStatus: 'INSTALLED',
+      );
+    }
+
+    return (modelId: bundledModelId, versionId: bundledVersionId);
+  }
 }
