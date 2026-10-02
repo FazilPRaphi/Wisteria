@@ -381,7 +381,7 @@ class _PatientDetailsPageState extends State<PatientDetailsPage> {
                 ),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 900),
+                    constraints: const BoxConstraints(maxWidth: 960),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -390,73 +390,65 @@ class _PatientDetailsPageState extends State<PatientDetailsPage> {
 
                         const SizedBox(height: 32),
 
-                        _buildSection(
-                          title: 'Personal Information',
-                          icon: Icons.person_outline_rounded,
-                          children: [
-                            _buildInfoRow('Name', patient.name),
-                            _buildInfoRow(
-                              'Age',
-                              patient.age?.toString() ?? 'Not provided',
-                            ),
-                            _buildInfoRow(
-                              'Blood Group',
-                              patient.bloodGroup ?? 'Not provided',
-                            ),
-                            _buildInfoRow(
-                              'Phone',
-                              patient.phoneNumber ?? 'Not provided',
-                            ),
-                            _buildInfoRow(
-                              'Other Contact',
-                              patient.otherContact ?? 'Not provided',
-                            ),
-                            _buildInfoRow(
-                              'Address',
-                              patient.address ?? 'Not provided',
-                            ),
-                          ],
+                        // ── Cards in a responsive layout ──
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isWide = constraints.maxWidth >= 700;
+
+                            if (isWide) {
+                              return Column(
+                                children: [
+                                  // Row 1: Biodata + New Examination
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        flex: 3,
+                                        child: _buildBiodataCard(patient),
+                                      ),
+                                      const SizedBox(width: 20),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Column(
+                                          children: [
+                                            _buildNewExaminationCard(patient),
+                                            const SizedBox(height: 20),
+                                            _buildAnalyticsPlaceholder(),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 20),
+
+                                  // Row 2: Medical history placeholder
+                                  _buildMedicalHistoryPlaceholder(),
+
+                                  const SizedBox(height: 20),
+
+                                  // Row 3: Examinations
+                                  _buildExaminationsSection(patient),
+                                ],
+                              );
+                            }
+
+                            return Column(
+                              children: [
+                                _buildBiodataCard(patient),
+                                const SizedBox(height: 20),
+                                _buildNewExaminationCard(patient),
+                                const SizedBox(height: 20),
+                                _buildAnalyticsPlaceholder(),
+                                const SizedBox(height: 20),
+                                _buildMedicalHistoryPlaceholder(),
+                                const SizedBox(height: 20),
+                                _buildExaminationsSection(patient),
+                              ],
+                            );
+                          },
                         ),
-
-                        const SizedBox(height: 20),
-
-                        _buildSection(
-                          title: 'Medical History',
-                          icon: Icons.history_rounded,
-                          children: const [
-                            _EmptySectionContent(
-                              message: 'No previous medical information yet.',
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        _buildSection(
-                          title: 'Previous Test Results',
-                          icon: Icons.science_outlined,
-                          children: const [
-                            _EmptySectionContent(
-                              message: 'No previous test results yet.',
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        _buildSection(
-                          title: 'Previous Medications',
-                          icon: Icons.medication_outlined,
-                          children: const [
-                            _EmptySectionContent(
-                              message: 'No previous medications yet.',
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        _buildExaminationsSection(patient),
 
                         const SizedBox(height: 48),
                       ],
@@ -472,6 +464,15 @@ class _PatientDetailsPageState extends State<PatientDetailsPage> {
   }
 
   Widget _buildPatientHeader(Patient patient) {
+    final initials = patient.name.isNotEmpty
+        ? patient.name
+              .split(' ')
+              .map((w) => w.isNotEmpty ? w[0] : '')
+              .take(2)
+              .join()
+              .toUpperCase()
+        : '?';
+
     return Row(
       children: [
         Container(
@@ -486,9 +487,9 @@ class _PatientDetailsPageState extends State<PatientDetailsPage> {
           ),
           child: Center(
             child: Text(
-              patient.name.isNotEmpty ? patient.name[0].toUpperCase() : '?',
+              initials,
               style: const TextStyle(
-                fontSize: 24,
+                fontSize: 22,
                 fontWeight: FontWeight.w700,
                 color: WisteriaColors.primary,
               ),
@@ -498,30 +499,233 @@ class _PatientDetailsPageState extends State<PatientDetailsPage> {
 
         const SizedBox(width: 20),
 
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              patient.name,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: WisteriaColors.textPrimary,
-                letterSpacing: -0.2,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                patient.name,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: WisteriaColors.textPrimary,
+                  letterSpacing: -0.2,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'ID: ${patient.id}',
-              style: const TextStyle(
-                fontSize: 12,
-                color: WisteriaColors.textMuted,
-                fontFamily: 'monospace',
+              const SizedBox(height: 4),
+              Text(
+                'ID: ${patient.id}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: WisteriaColors.textMuted,
+                  fontFamily: 'monospace',
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
+    );
+  }
+
+  // ── A. Patient Biodata Card ──
+
+  Widget _buildBiodataCard(Patient patient) {
+    return _buildSection(
+      title: 'Patient Information',
+      icon: Icons.person_outline_rounded,
+      children: [
+        _buildInfoRow('Name', patient.name),
+        _buildInfoRow('Age', patient.age?.toString() ?? 'Not provided'),
+        _buildInfoRow('Blood Group', patient.bloodGroup ?? 'Not provided'),
+        _buildInfoRow('Phone', patient.phoneNumber ?? 'Not provided'),
+        _buildInfoRow('Other Contact', patient.otherContact ?? 'Not provided'),
+        _buildInfoRow('Address', patient.address ?? 'Not provided'),
+      ],
+    );
+  }
+
+  // ── B. Analytics Placeholder Card ──
+
+  Widget _buildAnalyticsPlaceholder() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: WisteriaColors.surfaceLow,
+        borderRadius: BorderRadius.circular(WisteriaRadius.lg),
+        border: Border.all(color: WisteriaColors.border),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: WisteriaColors.info.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(WisteriaRadius.md),
+            ),
+            child: Icon(
+              Icons.analytics_outlined,
+              size: 26,
+              color: WisteriaColors.info.withValues(alpha: 0.6),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Patient Analytics',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: WisteriaColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Analytics and insights for this patient will be available in a future update.',
+            style: TextStyle(
+              fontSize: 13,
+              color: WisteriaColors.textMuted,
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: WisteriaColors.surfaceContainer,
+              borderRadius: BorderRadius.circular(WisteriaRadius.full),
+              border: Border.all(color: WisteriaColors.border),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.construction_rounded,
+                  size: 14,
+                  color: WisteriaColors.warning.withValues(alpha: 0.7),
+                ),
+                const SizedBox(width: 6),
+                const Text(
+                  'Coming soon',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: WisteriaColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── C. Medical History Placeholder Card ──
+
+  Widget _buildMedicalHistoryPlaceholder() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: WisteriaColors.surfaceLow,
+        borderRadius: BorderRadius.circular(WisteriaRadius.lg),
+        border: Border.all(color: WisteriaColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: WisteriaColors.tertiary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(WisteriaRadius.md),
+            ),
+            child: Icon(
+              Icons.timeline_rounded,
+              size: 24,
+              color: WisteriaColors.tertiary.withValues(alpha: 0.6),
+            ),
+          ),
+          const SizedBox(width: 20),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Medical History & Trends',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: WisteriaColors.textPrimary,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Longitudinal medical history and health trends will be available in a future iteration.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: WisteriaColors.textMuted,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            decoration: BoxDecoration(
+              color: WisteriaColors.surfaceContainer,
+              borderRadius: BorderRadius.circular(WisteriaRadius.full),
+              border: Border.all(color: WisteriaColors.border),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.construction_rounded,
+                  size: 13,
+                  color: WisteriaColors.warning.withValues(alpha: 0.7),
+                ),
+                const SizedBox(width: 5),
+                const Text(
+                  'Coming soon',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: WisteriaColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── D. New Examination Card ──
+
+  Widget _buildNewExaminationCard(Patient patient) {
+    return _NewExaminationCard(
+      onTap: () async {
+        final created = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CreateExaminationPage(
+              database: widget.database,
+              patientId: patient.id,
+              patientName: patient.name,
+            ),
+          ),
+        );
+
+        if (created == true && mounted) {
+          await _loadExaminations();
+        }
+      },
     );
   }
 
@@ -530,41 +734,6 @@ class _PatientDetailsPageState extends State<PatientDetailsPage> {
       title: 'Examinations',
       icon: Icons.medical_information_outlined,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Clinical examinations',
-              style: TextStyle(
-                fontSize: 13,
-                color: WisteriaColors.textSecondary,
-              ),
-            ),
-
-            FilledButton.icon(
-              onPressed: () async {
-                final created = await Navigator.push<bool>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CreateExaminationPage(
-                      database: widget.database,
-                      patientId: patient.id,
-                    ),
-                  ),
-                );
-
-                if (created == true && mounted) {
-                  await _loadExaminations();
-                }
-              },
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Create Examination'),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 20),
-
         if (_examinations.isEmpty)
           const _EmptySectionContent(message: 'No examinations yet.')
         else
@@ -578,8 +747,8 @@ class _PatientDetailsPageState extends State<PatientDetailsPage> {
   Widget _buildExaminationItem(Examination examination) {
     return InkWell(
       borderRadius: BorderRadius.circular(WisteriaRadius.md),
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => ExaminationDetailsPage(
@@ -588,6 +757,10 @@ class _PatientDetailsPageState extends State<PatientDetailsPage> {
             ),
           ),
         );
+
+        if (mounted) {
+          await _loadExaminations();
+        }
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -755,6 +928,98 @@ class _EmptySectionContent extends StatelessWidget {
         child: Text(
           message,
           style: const TextStyle(fontSize: 13, color: WisteriaColors.textMuted),
+        ),
+      ),
+    );
+  }
+}
+
+/// Prominent New Examination card.
+class _NewExaminationCard extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const _NewExaminationCard({required this.onTap});
+
+  @override
+  State<_NewExaminationCard> createState() => _NewExaminationCardState();
+}
+
+class _NewExaminationCardState extends State<_NewExaminationCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                WisteriaColors.primary.withValues(
+                  alpha: _isHovered ? 0.14 : 0.08,
+                ),
+                WisteriaColors.surfaceLow,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(WisteriaRadius.lg),
+            border: Border.all(
+              color: _isHovered
+                  ? WisteriaColors.primary.withValues(alpha: 0.5)
+                  : WisteriaColors.primary.withValues(alpha: 0.2),
+            ),
+            boxShadow: _isHovered
+                ? WisteriaElevation.accentGlow(WisteriaColors.primary)
+                : [],
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: WisteriaColors.primary.withValues(
+                    alpha: _isHovered ? 0.18 : 0.12,
+                  ),
+                  borderRadius: BorderRadius.circular(WisteriaRadius.md),
+                ),
+                child: Icon(
+                  Icons.add_circle_outline_rounded,
+                  size: 28,
+                  color: _isHovered
+                      ? WisteriaColors.primary
+                      : WisteriaColors.primary.withValues(alpha: 0.8),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'New Examination',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: WisteriaColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Create a clinical examination with AI-assisted diagnostics',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: WisteriaColors.textMuted,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );

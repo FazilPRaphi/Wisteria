@@ -82,6 +82,7 @@ class PatientRepository {
           ..where(
             (patient) =>
                 patient.name.like(searchQuery) |
+                patient.id.like(searchQuery) |
                 patient.phoneNumber.like(searchQuery),
           )
           ..orderBy([(patient) => OrderingTerm.asc(patient.name)]))
