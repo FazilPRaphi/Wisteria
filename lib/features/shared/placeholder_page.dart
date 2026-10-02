@@ -43,8 +43,9 @@ class PlaceholderPage extends StatelessWidget {
                         height: 88,
                         decoration: BoxDecoration(
                           color: accent.withValues(alpha: 0.08),
-                          borderRadius:
-                              BorderRadius.circular(WisteriaRadius.xl),
+                          borderRadius: BorderRadius.circular(
+                            WisteriaRadius.xl,
+                          ),
                           border: Border.all(
                             color: accent.withValues(alpha: 0.15),
                           ),
@@ -92,11 +93,10 @@ class PlaceholderPage extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: WisteriaColors.surfaceLow,
-                          borderRadius:
-                              BorderRadius.circular(WisteriaRadius.full),
-                          border: Border.all(
-                            color: WisteriaColors.border,
+                          borderRadius: BorderRadius.circular(
+                            WisteriaRadius.full,
                           ),
+                          border: Border.all(color: WisteriaColors.border),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -136,9 +136,7 @@ class PlaceholderPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: [
-          _BackButton(
-            onTap: () => Navigator.of(context).pop(),
-          ),
+          _BackButton(onTap: () => Navigator.of(context).pop()),
           const Spacer(),
         ],
       ),

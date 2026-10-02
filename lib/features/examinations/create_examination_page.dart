@@ -15,12 +15,10 @@ class CreateExaminationPage extends StatefulWidget {
   });
 
   @override
-  State<CreateExaminationPage> createState() =>
-      _CreateExaminationPageState();
+  State<CreateExaminationPage> createState() => _CreateExaminationPageState();
 }
 
-class _CreateExaminationPageState
-    extends State<CreateExaminationPage> {
+class _CreateExaminationPageState extends State<CreateExaminationPage> {
   final _formKey = GlobalKey<FormState>();
 
   final _doctorNotesController = TextEditingController();
@@ -60,18 +58,16 @@ class _CreateExaminationPageState
     });
 
     try {
-      final repository =
-          ExaminationRepository(widget.database);
+      final repository = ExaminationRepository(widget.database);
 
       await repository.createExamination(
         id: _uuid.v4(),
         patientId: widget.patientId,
         examinationType: _examinationType,
         dateTime: DateTime.now(),
-        doctorNotes:
-            _doctorNotesController.text.trim().isEmpty
-                ? null
-                : _doctorNotesController.text.trim(),
+        doctorNotes: _doctorNotesController.text.trim().isEmpty
+            ? null
+            : _doctorNotesController.text.trim(),
         previousDataRange: _previousDataRange,
       );
 
@@ -82,11 +78,7 @@ class _CreateExaminationPageState
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Failed to create examination: $e',
-          ),
-        ),
+        SnackBar(content: Text('Failed to create examination: $e')),
       );
     } finally {
       if (mounted) {
@@ -106,14 +98,10 @@ class _CreateExaminationPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Examination'),
-      ),
+      appBar: AppBar(title: const Text('Create Examination')),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: 700,
-          ),
+          constraints: const BoxConstraints(maxWidth: 700),
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Form(
@@ -122,10 +110,7 @@ class _CreateExaminationPageState
                 children: [
                   const Text(
                     'New Examination',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
 
                   const SizedBox(height: 8),
@@ -133,27 +118,24 @@ class _CreateExaminationPageState
                   Text(
                     'Create a clinical examination for this patient.',
                     style: TextStyle(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.65),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.65),
                     ),
                   ),
 
                   const SizedBox(height: 32),
 
                   DropdownButtonFormField<String>(
-                    value: _examinationType,
+                    initialValue: _examinationType,
                     decoration: const InputDecoration(
                       labelText: 'Examination Type',
                       border: OutlineInputBorder(),
                     ),
                     items: _examinationTypes
                         .map(
-                          (type) => DropdownMenuItem(
-                            value: type,
-                            child: Text(type),
-                          ),
+                          (type) =>
+                              DropdownMenuItem(value: type, child: Text(type)),
                         )
                         .toList(),
                     onChanged: (value) {
@@ -168,7 +150,7 @@ class _CreateExaminationPageState
                   const SizedBox(height: 20),
 
                   DropdownButtonFormField<String>(
-                    value: _previousDataRange,
+                    initialValue: _previousDataRange,
                     decoration: const InputDecoration(
                       labelText: 'Previous Data Context',
                       border: OutlineInputBorder(),
@@ -197,8 +179,7 @@ class _CreateExaminationPageState
                     maxLines: 5,
                     decoration: const InputDecoration(
                       labelText: 'Doctor Notes',
-                      hintText:
-                          'Enter any relevant clinical notes...',
+                      hintText: 'Enter any relevant clinical notes...',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -206,23 +187,15 @@ class _CreateExaminationPageState
                   const SizedBox(height: 32),
 
                   FilledButton.icon(
-                    onPressed:
-                        _saving ? null : _createExamination,
+                    onPressed: _saving ? null : _createExamination,
                     icon: _saving
                         ? const SizedBox(
                             width: 18,
                             height: 18,
-                            child:
-                                CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.add),
-                    label: Text(
-                      _saving
-                          ? 'Creating...'
-                          : 'Create Examination',
-                    ),
+                    label: Text(_saving ? 'Creating...' : 'Create Examination'),
                   ),
                 ],
               ),

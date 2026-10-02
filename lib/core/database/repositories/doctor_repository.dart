@@ -41,9 +41,7 @@ class DoctorRepository {
     if (existing == null) {
       await database.into(database.doctorProfiles).insert(companion);
     } else {
-      await database
-          .update(database.doctorProfiles)
-          .write(companion);
+      await database.update(database.doctorProfiles).write(companion);
     }
   }
 }

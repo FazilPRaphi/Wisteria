@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 
-
 // ============================================================
 // DOCTOR PROFILE
 // ============================================================
@@ -30,7 +29,6 @@ class DoctorProfiles extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // PATIENT
 // ============================================================
@@ -54,7 +52,6 @@ class Patients extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // PREVIOUS MEDICAL INFORMATION
 // ============================================================
@@ -62,8 +59,7 @@ class Patients extends Table {
 class PreviousMedicalInformations extends Table {
   TextColumn get id => text()();
 
-  TextColumn get patientId =>
-      text().references(Patients, #id)();
+  TextColumn get patientId => text().references(Patients, #id)();
 
   TextColumn get title => text()();
 
@@ -77,7 +73,6 @@ class PreviousMedicalInformations extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // PREVIOUS MEDICATION
 // ============================================================
@@ -85,8 +80,7 @@ class PreviousMedicalInformations extends Table {
 class PreviousMedications extends Table {
   TextColumn get id => text()();
 
-  TextColumn get patientId =>
-      text().references(Patients, #id)();
+  TextColumn get patientId => text().references(Patients, #id)();
 
   TextColumn get medicineName => text()();
 
@@ -104,7 +98,6 @@ class PreviousMedications extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // PREVIOUS TEST RESULTS
 // ============================================================
@@ -112,8 +105,7 @@ class PreviousMedications extends Table {
 class PreviousTestResults extends Table {
   TextColumn get id => text()();
 
-  TextColumn get patientId =>
-      text().references(Patients, #id)();
+  TextColumn get patientId => text().references(Patients, #id)();
 
   TextColumn get testName => text()();
 
@@ -131,7 +123,6 @@ class PreviousTestResults extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // EXAMINATION
 // ============================================================
@@ -139,8 +130,7 @@ class PreviousTestResults extends Table {
 class Examinations extends Table {
   TextColumn get id => text()();
 
-  TextColumn get patientId =>
-      text().references(Patients, #id)();
+  TextColumn get patientId => text().references(Patients, #id)();
 
   TextColumn get examinationType => text()();
 
@@ -156,7 +146,6 @@ class Examinations extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // MEDICAL IMAGE
 // ============================================================
@@ -164,8 +153,7 @@ class Examinations extends Table {
 class MedicalImages extends Table {
   TextColumn get id => text()();
 
-  TextColumn get examinationId =>
-      text().references(Examinations, #id)();
+  TextColumn get examinationId => text().references(Examinations, #id)();
 
   TextColumn get filePath => text()();
 
@@ -180,7 +168,6 @@ class MedicalImages extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
-
 
 // ============================================================
 // MEDICAL MODEL
@@ -203,7 +190,6 @@ class MedicalModels extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // MODEL VERSION
 // ============================================================
@@ -211,8 +197,7 @@ class MedicalModels extends Table {
 class ModelVersions extends Table {
   TextColumn get id => text()();
 
-  TextColumn get modelId =>
-      text().references(MedicalModels, #id)();
+  TextColumn get modelId => text().references(MedicalModels, #id)();
 
   TextColumn get version => text()();
 
@@ -228,7 +213,6 @@ class ModelVersions extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // MODEL RUN
 // ============================================================
@@ -236,17 +220,13 @@ class ModelVersions extends Table {
 class ModelRuns extends Table {
   TextColumn get id => text()();
 
-  TextColumn get examinationId =>
-      text().references(Examinations, #id)();
+  TextColumn get examinationId => text().references(Examinations, #id)();
 
-  TextColumn get modelId =>
-      text().references(MedicalModels, #id)();
+  TextColumn get modelId => text().references(MedicalModels, #id)();
 
-  TextColumn get modelVersionId =>
-      text().references(ModelVersions, #id)();
+  TextColumn get modelVersionId => text().references(ModelVersions, #id)();
 
-  TextColumn get inputImageId =>
-      text().references(MedicalImages, #id)();
+  TextColumn get inputImageId => text().references(MedicalImages, #id)();
 
   DateTimeColumn get inputImageDate => dateTime()();
 
@@ -256,7 +236,6 @@ class ModelRuns extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // MODEL RUN RESULT
 // ============================================================
@@ -264,8 +243,7 @@ class ModelRuns extends Table {
 class ModelRunResults extends Table {
   TextColumn get id => text()();
 
-  TextColumn get modelRunId =>
-      text().references(ModelRuns, #id)();
+  TextColumn get modelRunId => text().references(ModelRuns, #id)();
 
   TextColumn get status => text()();
 
@@ -279,7 +257,6 @@ class ModelRunResults extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // MODEL FINDING
 // ============================================================
@@ -287,8 +264,7 @@ class ModelRunResults extends Table {
 class ModelFindings extends Table {
   TextColumn get id => text()();
 
-  TextColumn get modelRunResultId =>
-      text().references(ModelRunResults, #id)();
+  TextColumn get modelRunResultId => text().references(ModelRunResults, #id)();
 
   TextColumn get label => text()();
 
@@ -300,7 +276,6 @@ class ModelFindings extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // AI ANALYSIS
 // ============================================================
@@ -308,8 +283,7 @@ class ModelFindings extends Table {
 class AiAnalyses extends Table {
   TextColumn get id => text()();
 
-  TextColumn get examinationId =>
-      text().references(Examinations, #id)();
+  TextColumn get examinationId => text().references(Examinations, #id)();
 
   DateTimeColumn get generatedAt => dateTime()();
 
@@ -327,7 +301,6 @@ class AiAnalyses extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // EVIDENCE
 // ============================================================
@@ -335,8 +308,7 @@ class AiAnalyses extends Table {
 class Evidence extends Table {
   TextColumn get id => text()();
 
-  TextColumn get analysisId =>
-      text().references(AiAnalyses, #id)();
+  TextColumn get analysisId => text().references(AiAnalyses, #id)();
 
   TextColumn get sourceType => text()();
 
@@ -352,7 +324,6 @@ class Evidence extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // DOCTOR REVIEW
 // ============================================================
@@ -360,8 +331,7 @@ class Evidence extends Table {
 class DoctorReviews extends Table {
   TextColumn get id => text()();
 
-  TextColumn get examinationId =>
-      text().references(Examinations, #id)();
+  TextColumn get examinationId => text().references(Examinations, #id)();
 
   TextColumn get reviewStatus => text()();
 
@@ -373,7 +343,6 @@ class DoctorReviews extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-
 // ============================================================
 // FINAL REPORT
 // ============================================================
@@ -381,8 +350,7 @@ class DoctorReviews extends Table {
 class FinalReports extends Table {
   TextColumn get id => text()();
 
-  TextColumn get examinationId =>
-      text().references(Examinations, #id)();
+  TextColumn get examinationId => text().references(Examinations, #id)();
 
   DateTimeColumn get generatedAt => dateTime()();
 
@@ -393,7 +361,6 @@ class FinalReports extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
-
 
 // ============================================================
 // SYNC ITEM

@@ -6,72 +6,76 @@ import 'widgets/dashboard_card.dart';
 class DashboardPage extends StatelessWidget {
   final void Function(String page) onNavigate;
 
-  const DashboardPage({
-    super.key,
-    required this.onNavigate,
-  });
+  const DashboardPage({super.key, required this.onNavigate});
 
   List<DashboardCardData> get _cards => const [
-        DashboardCardData(
-          title: 'Patients',
-          subtitle: 'Manage patient records',
-          icon: Icons.people_rounded,
-          route: 'patients',
-          isHero: true,
-          accentColor: WisteriaColors.primary,
-        ),
-        DashboardCardData(
-          title: 'History',
-          subtitle: 'View examination history',
-          icon: Icons.history_rounded,
-          route: 'history',
-        ),
-        DashboardCardData(
-          title: 'Profile',
-          subtitle: 'Doctor profile',
-          icon: Icons.person_rounded,
-          route: 'profile',
-          accentColor: WisteriaColors.tertiary,
-        ),
-        DashboardCardData(
-          title: 'Models',
-          subtitle: 'Installed AI models',
-          icon: Icons.memory_rounded,
-          route: 'models',
-        ),
-        DashboardCardData(
-          title: 'Sync',
-          subtitle: 'Synchronize clinical data',
-          icon: Icons.sync_rounded,
-          route: 'sync',
-        ),
-        DashboardCardData(
-          title: 'AI Workspace',
-          subtitle: 'AI analysis workspace',
-          icon: Icons.auto_awesome_rounded,
-          route: 'ai',
-          isHero: true,
-          accentColor: Color(0xFFA78BFA),
-        ),
-        DashboardCardData(
-          title: 'Analytics',
-          subtitle: 'Clinical analytics & insights',
-          icon: Icons.analytics_rounded,
-          route: 'analytics',
-        ),
-        DashboardCardData(
-          title: 'Model Registry',
-          subtitle: 'Browse available models',
-          icon: Icons.download_rounded,
-          route: 'more_models',
-        ),
-        DashboardCardData(
-          title: 'Settings',
-          subtitle: 'Configure Wisteria',
-          icon: Icons.settings_rounded,
-          route: 'settings',
-        ),
-      ];
+    DashboardCardData(
+      title: 'Patients',
+      subtitle: 'Manage patient records',
+      icon: Icons.people_rounded,
+      route: 'patients',
+      isHero: true,
+      accentColor: WisteriaColors.primary,
+    ),
+    DashboardCardData(
+      title: 'History',
+      subtitle: 'View examination history',
+      icon: Icons.history_rounded,
+      route: 'history',
+    ),
+    DashboardCardData(
+      title: 'Profile',
+      subtitle: 'Doctor profile',
+      icon: Icons.person_rounded,
+      route: 'profile',
+      accentColor: WisteriaColors.tertiary,
+    ),
+    DashboardCardData(
+      title: 'Models',
+      subtitle: 'Installed AI models',
+      icon: Icons.memory_rounded,
+      route: 'models',
+    ),
+    DashboardCardData(
+      title: 'Sync',
+      subtitle: 'Synchronize clinical data',
+      icon: Icons.sync_rounded,
+      route: 'sync',
+    ),
+    DashboardCardData(
+      title: 'AI Workspace',
+      subtitle: 'AI analysis workspace',
+      icon: Icons.auto_awesome_rounded,
+      route: 'ai',
+      isHero: true,
+      accentColor: Color(0xFFA78BFA),
+    ),
+    DashboardCardData(
+      title: 'Analytics',
+      subtitle: 'Clinical analytics & insights',
+      icon: Icons.analytics_rounded,
+      route: 'analytics',
+    ),
+    DashboardCardData(
+      title: 'Model Registry',
+      subtitle: 'Browse available models',
+      icon: Icons.download_rounded,
+      route: 'more_models',
+    ),
+    DashboardCardData(
+      title: 'Settings',
+      subtitle: 'Configure Wisteria',
+      icon: Icons.settings_rounded,
+      route: 'settings',
+    ),
+    DashboardCardData(
+      title: 'Test Model',
+      subtitle: 'Run an image through the local model',
+      icon: Icons.science_rounded,
+      route: 'test_model',
+      accentColor: WisteriaColors.secondary,
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -184,11 +188,7 @@ class DashboardPage extends StatelessWidget {
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.circle,
-                size: 8,
-                color: WisteriaColors.success,
-              ),
+              Icon(Icons.circle, size: 8, color: WisteriaColors.success),
               SizedBox(width: 8),
               Text(
                 'System Active',
@@ -338,9 +338,10 @@ class _StaggeredCardGrid extends StatelessWidget {
 
         const SizedBox(height: 16),
 
-        // Row 5: Settings
+        // Row 5: Settings + Test Model
         _buildRow([
           _CardSlot(cards[8], flex: 1), // Settings
+          _CardSlot(cards[9], flex: 1), // Test Model
         ], height: 170),
       ],
     );
@@ -374,10 +375,11 @@ class _StaggeredCardGrid extends StatelessWidget {
 
         const SizedBox(height: 16),
 
-        // Row 4: More Models + Settings
+        // Row 4: More Models + Settings + Test Model
         _buildRow([
           _CardSlot(cards[7], flex: 1), // More Models
           _CardSlot(cards[8], flex: 1), // Settings
+          _CardSlot(cards[9], flex: 1), // Test Model
         ], height: 185),
       ],
     );

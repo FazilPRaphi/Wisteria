@@ -8,12 +8,7 @@ class DoctorDocumentStorage {
     final appDirectory = await getApplicationSupportDirectory();
 
     final documentsDirectory = Directory(
-      path.join(
-        appDirectory.path,
-        'Wisteria',
-        'doctor',
-        'documents',
-      ),
+      path.join(appDirectory.path, 'Wisteria', 'doctor', 'documents'),
     );
 
     if (!await documentsDirectory.exists()) {
@@ -22,10 +17,7 @@ class DoctorDocumentStorage {
 
     final fileName = path.basename(sourcePath);
 
-    final destinationPath = path.join(
-      documentsDirectory.path,
-      fileName,
-    );
+    final destinationPath = path.join(documentsDirectory.path, fileName);
 
     final sourceFile = File(sourcePath);
 

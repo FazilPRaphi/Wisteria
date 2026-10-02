@@ -12,9 +12,9 @@ class PatientRepository {
   }
 
   Future<Patient?> getPatientById(String id) {
-    return (database.select(database.patients)
-          ..where((patient) => patient.id.equals(id)))
-        .getSingleOrNull();
+    return (database.select(
+      database.patients,
+    )..where((patient) => patient.id.equals(id))).getSingleOrNull();
   }
 
   Future<void> createPatient({
@@ -26,7 +26,9 @@ class PatientRepository {
     String? otherContact,
     String? address,
   }) async {
-    await database.into(database.patients).insert(
+    await database
+        .into(database.patients)
+        .insert(
           PatientsCompanion.insert(
             id: id,
             name: name,
@@ -48,9 +50,10 @@ class PatientRepository {
     String? otherContact,
     String? address,
   }) async {
-    final updatedRows = await (database.update(database.patients)
-          ..where((patient) => patient.id.equals(id)))
-        .write(
+    final updatedRows =
+        await (database.update(
+          database.patients,
+        )..where((patient) => patient.id.equals(id))).write(
           PatientsCompanion(
             name: Value(name),
             phoneNumber: Value(phoneNumber),
@@ -65,24 +68,23 @@ class PatientRepository {
   }
 
   Future<bool> deletePatient(String id) async {
-    final deletedRows = await (database.delete(database.patients)
-          ..where((patient) => patient.id.equals(id)))
-        .go();
+    final deletedRows = await (database.delete(
+      database.patients,
+    )..where((patient) => patient.id.equals(id))).go();
 
     return deletedRows > 0;
   }
-Future<List<Patient>> searchPatients(String query) {
-  final searchQuery = '%${query.trim()}%';
 
-  return (database.select(database.patients)
-        ..where(
-          (patient) =>
-              patient.name.like(searchQuery) |
-              patient.phoneNumber.like(searchQuery),
-        )
-        ..orderBy([
-          (patient) => OrderingTerm.asc(patient.name),
-        ]))
-      .get();
-}
+  Future<List<Patient>> searchPatients(String query) {
+    final searchQuery = '%${query.trim()}%';
+
+    return (database.select(database.patients)
+          ..where(
+            (patient) =>
+                patient.name.like(searchQuery) |
+                patient.phoneNumber.like(searchQuery),
+          )
+          ..orderBy([(patient) => OrderingTerm.asc(patient.name)]))
+        .get();
+  }
 }

@@ -7,20 +7,13 @@ import 'core/theme/wisteria_theme.dart';
 void main() {
   final database = WisteriaDatabase();
 
-  runApp(
-    WisteriaApp(
-      database: database,
-    ),
-  );
+  runApp(WisteriaApp(database: database));
 }
 
 class WisteriaApp extends StatelessWidget {
   final WisteriaDatabase database;
 
-  const WisteriaApp({
-    super.key,
-    required this.database,
-  });
+  const WisteriaApp({super.key, required this.database});
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +23,7 @@ class WisteriaApp extends StatelessWidget {
 
       theme: buildWisteriaTheme(),
 
-      home: WisteriaAppShell(
-        database: database,
-      ),
+      home: WisteriaAppShell(database: database),
     );
   }
 }

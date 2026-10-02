@@ -8,11 +8,7 @@ class WisteriaBackButton extends StatefulWidget {
   final String label;
   final VoidCallback? onTap;
 
-  const WisteriaBackButton({
-    super.key,
-    this.label = 'Dashboard',
-    this.onTap,
-  });
+  const WisteriaBackButton({super.key, this.label = 'Dashboard', this.onTap});
 
   @override
   State<WisteriaBackButton> createState() => _WisteriaBackButtonState();

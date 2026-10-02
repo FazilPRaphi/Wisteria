@@ -10,10 +10,7 @@ import '../shared/wisteria_back_button.dart';
 class DoctorProfilePage extends StatefulWidget {
   final WisteriaDatabase database;
 
-  const DoctorProfilePage({
-    super.key,
-    required this.database,
-  });
+  const DoctorProfilePage({super.key, required this.database});
 
   @override
   State<DoctorProfilePage> createState() => _DoctorProfilePageState();
@@ -59,29 +56,21 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     if (profile != null) {
       _doctorNameController.text = profile.doctorName;
 
-      _specializationController.text =
-          profile.specialization ?? '';
+      _specializationController.text = profile.specialization ?? '';
 
-      _clinicNameController.text =
-          profile.clinicName ?? '';
+      _clinicNameController.text = profile.clinicName ?? '';
 
-      _clinicAddressController.text =
-          profile.clinicAddress ?? '';
+      _clinicAddressController.text = profile.clinicAddress ?? '';
 
-      _clinicPhoneController.text =
-          profile.clinicPhoneNumber ?? '';
+      _clinicPhoneController.text = profile.clinicPhoneNumber ?? '';
 
-      _emailController.text =
-          profile.email ?? '';
+      _emailController.text = profile.email ?? '';
 
-      _signatureController.text =
-          profile.signature ?? '';
+      _signatureController.text = profile.signature ?? '';
 
-      _documentPath =
-          profile.documentPath;
+      _documentPath = profile.documentPath;
 
-      _documentFileName =
-          profile.documentFileName;
+      _documentFileName = profile.documentFileName;
     }
 
     setState(() {
@@ -102,18 +91,12 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
       await _doctorRepository.saveProfile(
         id: 'local-doctor',
         doctorName: _doctorNameController.text.trim(),
-        specialization:
-            _optionalValue(_specializationController),
-        clinicName:
-            _optionalValue(_clinicNameController),
-        clinicAddress:
-            _optionalValue(_clinicAddressController),
-        clinicPhoneNumber:
-            _optionalValue(_clinicPhoneController),
-        email:
-            _optionalValue(_emailController),
-        signature:
-            _optionalValue(_signatureController),
+        specialization: _optionalValue(_specializationController),
+        clinicName: _optionalValue(_clinicNameController),
+        clinicAddress: _optionalValue(_clinicAddressController),
+        clinicPhoneNumber: _optionalValue(_clinicPhoneController),
+        email: _optionalValue(_emailController),
+        signature: _optionalValue(_signatureController),
         documentPath: _documentPath,
         documentFileName: _documentFileName,
       );
@@ -125,11 +108,9 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
         _isSaving = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Doctor profile saved'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Doctor profile saved')));
     } catch (e) {
       if (!mounted) return;
 
@@ -138,11 +119,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Failed to save doctor profile: $e',
-          ),
-        ),
+        SnackBar(content: Text('Failed to save doctor profile: $e')),
       );
     }
   }
@@ -158,15 +135,11 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
         allowedExtensions: ['pdf'],
       );
 
-      if (selectedFile == null ||
-          selectedFile.path == null) {
+      if (selectedFile == null || selectedFile.path == null) {
         return;
       }
 
-      final savedPath =
-          await _documentStorage.saveDocument(
-        selectedFile.path!,
-      );
+      final savedPath = await _documentStorage.saveDocument(selectedFile.path!);
 
       if (!mounted) return;
 
@@ -177,13 +150,9 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Failed to add document: $e',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to add document: $e')));
     } finally {
       if (mounted) {
         setState(() {
@@ -193,9 +162,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     }
   }
 
-  String? _optionalValue(
-    TextEditingController controller,
-  ) {
+  String? _optionalValue(TextEditingController controller) {
     final value = controller.text.trim();
 
     return value.isEmpty ? null : value;
@@ -228,9 +195,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
       return const Scaffold(
         backgroundColor: WisteriaColors.background,
         body: Center(
-          child: CircularProgressIndicator(
-            color: WisteriaColors.primary,
-          ),
+          child: CircularProgressIndicator(color: WisteriaColors.primary),
         ),
       );
     }
@@ -241,10 +206,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Row(
                 children: [
                   const WisteriaBackButton(),
@@ -270,9 +232,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                 ),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: 700,
-                    ),
+                    constraints: const BoxConstraints(maxWidth: 700),
                     child: _isEditing
                         ? _buildEditProfile()
                         : _buildProfileView(),
@@ -310,12 +270,8 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                 _isEditing = true;
               });
             },
-            icon: const Icon(
-              Icons.edit_outlined,
-            ),
-            label: const Text(
-              'Edit Profile',
-            ),
+            icon: const Icon(Icons.edit_outlined),
+            label: const Text('Edit Profile'),
           ),
         ),
 
@@ -331,14 +287,10 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
           width: 52,
           height: 52,
           decoration: BoxDecoration(
-            color: WisteriaColors.tertiary
-                .withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(
-              WisteriaRadius.lg,
-            ),
+            color: WisteriaColors.tertiary.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(WisteriaRadius.lg),
             border: Border.all(
-              color: WisteriaColors.tertiary
-                  .withValues(alpha: 0.15),
+              color: WisteriaColors.tertiary.withValues(alpha: 0.15),
             ),
           ),
           child: const Icon(
@@ -351,8 +303,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
         const SizedBox(width: 18),
 
         const Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Doctor Profile',
@@ -366,10 +317,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
             SizedBox(height: 4),
             Text(
               'Doctor information and documents',
-              style: TextStyle(
-                fontSize: 13,
-                color: WisteriaColors.textMuted,
-              ),
+              style: TextStyle(fontSize: 13, color: WisteriaColors.textMuted),
             ),
           ],
         ),
@@ -383,55 +331,31 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
         color: WisteriaColors.surfaceLow,
-        borderRadius: BorderRadius.circular(
-          WisteriaRadius.lg,
-        ),
-        border: Border.all(
-          color: WisteriaColors.border,
-        ),
+        borderRadius: BorderRadius.circular(WisteriaRadius.lg),
+        border: Border.all(color: WisteriaColors.border),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionLabel(
-            'Doctor Information',
-          ),
+          _buildSectionLabel('Doctor Information'),
 
           const SizedBox(height: 20),
 
-          _buildProfileField(
-            'Doctor Name',
-            _doctorNameController.text,
-          ),
+          _buildProfileField('Doctor Name', _doctorNameController.text),
 
-          _buildProfileField(
-            'Specialization',
-            _specializationController.text,
-          ),
+          _buildProfileField('Specialization', _specializationController.text),
 
-          _buildProfileField(
-            'Email',
-            _emailController.text,
-          ),
+          _buildProfileField('Email', _emailController.text),
 
           const SizedBox(height: 12),
 
-          _buildSectionLabel(
-            'Clinic Details',
-          ),
+          _buildSectionLabel('Clinic Details'),
 
           const SizedBox(height: 20),
 
-          _buildProfileField(
-            'Clinic Name',
-            _clinicNameController.text,
-          ),
+          _buildProfileField('Clinic Name', _clinicNameController.text),
 
-          _buildProfileField(
-            'Clinic Address',
-            _clinicAddressController.text,
-          ),
+          _buildProfileField('Clinic Address', _clinicAddressController.text),
 
           _buildProfileField(
             'Clinic Phone Number',
@@ -440,45 +364,31 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
           const SizedBox(height: 12),
 
-          _buildSectionLabel(
-            'Signature',
-          ),
+          _buildSectionLabel('Signature'),
 
           const SizedBox(height: 20),
 
-          _buildProfileField(
-            'Signature',
-            _signatureController.text,
-          ),
+          _buildProfileField('Signature', _signatureController.text),
         ],
       ),
     );
   }
 
   Widget _buildDocumentCard() {
-    final hasDocument =
-        _documentPath != null &&
-        _documentPath!.isNotEmpty;
+    final hasDocument = _documentPath != null && _documentPath!.isNotEmpty;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: WisteriaColors.surfaceLow,
-        borderRadius: BorderRadius.circular(
-          WisteriaRadius.lg,
-        ),
-        border: Border.all(
-          color: WisteriaColors.border,
-        ),
+        borderRadius: BorderRadius.circular(WisteriaRadius.lg),
+        border: Border.all(color: WisteriaColors.border),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionLabel(
-            'Doctor Document',
-          ),
+          _buildSectionLabel('Doctor Document'),
 
           const SizedBox(height: 20),
 
@@ -489,12 +399,8 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: WisteriaColors.primary
-                        .withValues(alpha: 0.10),
-                    borderRadius:
-                        BorderRadius.circular(
-                      WisteriaRadius.md,
-                    ),
+                    color: WisteriaColors.primary.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(WisteriaRadius.md),
                   ),
                   child: const Icon(
                     Icons.picture_as_pdf_outlined,
@@ -506,13 +412,11 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
                 Expanded(
                   child: Text(
-                    _documentFileName ??
-                        'Doctor document',
+                    _documentFileName ?? 'Doctor document',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color:
-                          WisteriaColors.textPrimary,
+                      color: WisteriaColors.textPrimary,
                     ),
                   ),
                 ),
@@ -521,10 +425,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
           else
             const Text(
               'No doctor document added.',
-              style: TextStyle(
-                fontSize: 13,
-                color: WisteriaColors.textMuted,
-              ),
+              style: TextStyle(fontSize: 13, color: WisteriaColors.textMuted),
             ),
         ],
       ),
@@ -533,8 +434,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
   Widget _buildEditProfile() {
     return Column(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildHeader(),
 
@@ -545,39 +445,24 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
           padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
             color: WisteriaColors.surfaceLow,
-            borderRadius: BorderRadius.circular(
-              WisteriaRadius.lg,
-            ),
-            border: Border.all(
-              color: WisteriaColors.border,
-            ),
+            borderRadius: BorderRadius.circular(WisteriaRadius.lg),
+            border: Border.all(color: WisteriaColors.border),
           ),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionLabel(
-                  'Doctor Information',
-                ),
+                _buildSectionLabel('Doctor Information'),
 
                 const SizedBox(height: 16),
 
                 TextFormField(
-                  controller:
-                      _doctorNameController,
-                  style: const TextStyle(
-                    color:
-                        WisteriaColors.textPrimary,
-                  ),
-                  decoration:
-                      const InputDecoration(
-                    labelText: 'Doctor Name',
-                  ),
+                  controller: _doctorNameController,
+                  style: const TextStyle(color: WisteriaColors.textPrimary),
+                  decoration: const InputDecoration(labelText: 'Doctor Name'),
                   validator: (value) {
-                    if (value == null ||
-                        value.trim().isEmpty) {
+                    if (value == null || value.trim().isEmpty) {
                       return 'Doctor name is required';
                     }
 
@@ -588,14 +473,9 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                 const SizedBox(height: 20),
 
                 TextFormField(
-                  controller:
-                      _specializationController,
-                  style: const TextStyle(
-                    color:
-                        WisteriaColors.textPrimary,
-                  ),
-                  decoration:
-                      const InputDecoration(
+                  controller: _specializationController,
+                  style: const TextStyle(color: WisteriaColors.textPrimary),
+                  decoration: const InputDecoration(
                     labelText: 'Specialization',
                   ),
                 ),
@@ -603,53 +483,31 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                 const SizedBox(height: 20),
 
                 TextFormField(
-                  controller:
-                      _emailController,
-                  keyboardType:
-                      TextInputType.emailAddress,
-                  style: const TextStyle(
-                    color:
-                        WisteriaColors.textPrimary,
-                  ),
-                  decoration:
-                      const InputDecoration(
-                    labelText: 'Email',
-                  ),
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  style: const TextStyle(color: WisteriaColors.textPrimary),
+                  decoration: const InputDecoration(labelText: 'Email'),
                 ),
 
                 const SizedBox(height: 32),
 
-                _buildSectionLabel(
-                  'Clinic Details',
-                ),
+                _buildSectionLabel('Clinic Details'),
 
                 const SizedBox(height: 16),
 
                 TextFormField(
-                  controller:
-                      _clinicNameController,
-                  style: const TextStyle(
-                    color:
-                        WisteriaColors.textPrimary,
-                  ),
-                  decoration:
-                      const InputDecoration(
-                    labelText: 'Clinic Name',
-                  ),
+                  controller: _clinicNameController,
+                  style: const TextStyle(color: WisteriaColors.textPrimary),
+                  decoration: const InputDecoration(labelText: 'Clinic Name'),
                 ),
 
                 const SizedBox(height: 20),
 
                 TextFormField(
-                  controller:
-                      _clinicAddressController,
+                  controller: _clinicAddressController,
                   maxLines: 3,
-                  style: const TextStyle(
-                    color:
-                        WisteriaColors.textPrimary,
-                  ),
-                  decoration:
-                      const InputDecoration(
+                  style: const TextStyle(color: WisteriaColors.textPrimary),
+                  decoration: const InputDecoration(
                     labelText: 'Clinic Address',
                     alignLabelWithHint: true,
                   ),
@@ -658,77 +516,50 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                 const SizedBox(height: 20),
 
                 TextFormField(
-                  controller:
-                      _clinicPhoneController,
-                  keyboardType:
-                      TextInputType.phone,
-                  style: const TextStyle(
-                    color:
-                        WisteriaColors.textPrimary,
-                  ),
-                  decoration:
-                      const InputDecoration(
-                    labelText:
-                        'Clinic Phone Number',
+                  controller: _clinicPhoneController,
+                  keyboardType: TextInputType.phone,
+                  style: const TextStyle(color: WisteriaColors.textPrimary),
+                  decoration: const InputDecoration(
+                    labelText: 'Clinic Phone Number',
                   ),
                 ),
 
                 const SizedBox(height: 32),
 
-                _buildSectionLabel(
-                  'Signature',
-                ),
+                _buildSectionLabel('Signature'),
 
                 const SizedBox(height: 16),
 
                 TextFormField(
-                  controller:
-                      _signatureController,
+                  controller: _signatureController,
                   maxLines: 2,
-                  style: const TextStyle(
-                    color:
-                        WisteriaColors.textPrimary,
-                  ),
-                  decoration:
-                      const InputDecoration(
+                  style: const TextStyle(color: WisteriaColors.textPrimary),
+                  decoration: const InputDecoration(
                     labelText: 'Signature',
-                    hintText:
-                        'Signature information / reference',
+                    hintText: 'Signature information / reference',
                     alignLabelWithHint: true,
                   ),
                 ),
 
                 const SizedBox(height: 32),
 
-                _buildSectionLabel(
-                  'Doctor Document',
-                ),
+                _buildSectionLabel('Doctor Document'),
 
                 const SizedBox(height: 16),
 
                 if (_documentFileName != null)
                   Container(
                     width: double.infinity,
-                    padding:
-                        const EdgeInsets.all(16),
-                    decoration:
-                        BoxDecoration(
-                      borderRadius:
-                          BorderRadius.circular(
-                        WisteriaRadius.md,
-                      ),
-                      border: Border.all(
-                        color:
-                            WisteriaColors.border,
-                      ),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(WisteriaRadius.md),
+                      border: Border.all(color: WisteriaColors.border),
                     ),
                     child: Row(
                       children: [
                         const Icon(
-                          Icons
-                              .picture_as_pdf_outlined,
-                          color:
-                              WisteriaColors.primary,
+                          Icons.picture_as_pdf_outlined,
+                          color: WisteriaColors.primary,
                         ),
 
                         const SizedBox(width: 12),
@@ -736,11 +567,9 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                         Expanded(
                           child: Text(
                             _documentFileName!,
-                            style:
-                                const TextStyle(
+                            style: const TextStyle(
                               fontSize: 13,
-                              color: WisteriaColors
-                                  .textPrimary,
+                              color: WisteriaColors.textPrimary,
                             ),
                           ),
                         ),
@@ -752,38 +581,27 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                     'No PDF selected.',
                     style: TextStyle(
                       fontSize: 13,
-                      color:
-                          WisteriaColors.textMuted,
+                      color: WisteriaColors.textMuted,
                     ),
                   ),
 
                 const SizedBox(height: 14),
 
                 OutlinedButton.icon(
-                  onPressed:
-                      _isPickingDocument
-                          ? null
-                          : _pickDoctorDocument,
+                  onPressed: _isPickingDocument ? null : _pickDoctorDocument,
                   icon: _isPickingDocument
                       ? const SizedBox(
                           width: 16,
                           height: 16,
-                          child:
-                              CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(
-                          Icons
-                              .upload_file_outlined,
-                        ),
+                      : const Icon(Icons.upload_file_outlined),
                   label: Text(
                     _isPickingDocument
                         ? 'Selecting...'
-                        : _documentFileName ==
-                                null
-                            ? 'Add PDF'
-                            : 'Replace PDF',
+                        : _documentFileName == null
+                        ? 'Add PDF'
+                        : 'Replace PDF',
                   ),
                 ),
 
@@ -793,12 +611,8 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: _isSaving
-                            ? null
-                            : _cancelEditing,
-                        child: const Text(
-                          'Cancel',
-                        ),
+                        onPressed: _isSaving ? null : _cancelEditing,
+                        child: const Text('Cancel'),
                       ),
                     ),
 
@@ -806,28 +620,18 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
                     Expanded(
                       child: FilledButton.icon(
-                        onPressed: _isSaving
-                            ? null
-                            : _saveProfile,
+                        onPressed: _isSaving ? null : _saveProfile,
                         icon: _isSaving
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child:
-                                    CircularProgressIndicator(
+                                child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: WisteriaColors
-                                      .textOnPrimary,
+                                  color: WisteriaColors.textOnPrimary,
                                 ),
                               )
-                            : const Icon(
-                                Icons.save_rounded,
-                              ),
-                        label: Text(
-                          _isSaving
-                              ? 'Saving...'
-                              : 'Save Changes',
-                        ),
+                            : const Icon(Icons.save_rounded),
+                        label: Text(_isSaving ? 'Saving...' : 'Save Changes'),
                       ),
                     ),
                   ],
@@ -842,21 +646,13 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     );
   }
 
-  Widget _buildProfileField(
-    String label,
-    String value,
-  ) {
-    final displayValue =
-        value.trim().isEmpty
-            ? 'Not provided'
-            : value.trim();
+  Widget _buildProfileField(String label, String value) {
+    final displayValue = value.trim().isEmpty ? 'Not provided' : value.trim();
 
     return Padding(
-      padding:
-          const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.only(bottom: 18),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
@@ -872,8 +668,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
             displayValue,
             style: const TextStyle(
               fontSize: 15,
-              color:
-                  WisteriaColors.textPrimary,
+              color: WisteriaColors.textPrimary,
             ),
           ),
         ],
@@ -881,19 +676,15 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     );
   }
 
-  Widget _buildSectionLabel(
-    String label,
-  ) {
+  Widget _buildSectionLabel(String label) {
     return Row(
       children: [
         Container(
           width: 3,
           height: 14,
           decoration: BoxDecoration(
-            color: WisteriaColors.primary
-                .withValues(alpha: 0.6),
-            borderRadius:
-                BorderRadius.circular(2),
+            color: WisteriaColors.primary.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
 

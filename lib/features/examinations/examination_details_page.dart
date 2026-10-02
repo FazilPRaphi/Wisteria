@@ -20,35 +20,32 @@ class ExaminationDetailsPage extends StatefulWidget {
   });
 
   @override
-  State<ExaminationDetailsPage> createState() =>
-      _ExaminationDetailsPageState();
+  State<ExaminationDetailsPage> createState() => _ExaminationDetailsPageState();
 }
 
-class _ExaminationDetailsPageState
-    extends State<ExaminationDetailsPage> {
+class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
   late final ExaminationRepository _repository;
-late final MedicalImageRepository _imageRepository;
-late final MedicalImageStorage _imageStorage;
+  late final MedicalImageRepository _imageRepository;
+  late final MedicalImageStorage _imageStorage;
 
-Examination? _examination;
-List<MedicalImage> _medicalImages = [];
-bool _isLoading = true;
-bool _isAddingImage = false;
+  Examination? _examination;
+  List<MedicalImage> _medicalImages = [];
+  bool _isLoading = true;
+  bool _isAddingImage = false;
   @override
   void initState() {
     super.initState();
 
     _repository = ExaminationRepository(widget.database);
-_imageRepository = MedicalImageRepository(widget.database);
-_imageStorage = MedicalImageStorage();
+    _imageRepository = MedicalImageRepository(widget.database);
+    _imageStorage = MedicalImageStorage();
 
-_loadExamination();
-_loadMedicalImages();
+    _loadExamination();
+    _loadMedicalImages();
   }
 
   Future<void> _loadExamination() async {
-    final examination =
-        await _repository.getExaminationById(
+    final examination = await _repository.getExaminationById(
       widget.examinationId,
     );
 
@@ -59,167 +56,160 @@ _loadMedicalImages();
       _isLoading = false;
     });
   }
+
   Future<void> _loadMedicalImages() async {
-  final images = await _imageRepository.getImagesForExamination(
-    widget.examinationId,
-  );
-
-  if (!mounted) return;
-
-  setState(() {
-    _medicalImages = images;
-  });
-}
-Future<void> _addMedicalImage() async {
-  setState(() {
-    _isAddingImage = true;
-  });
-
-  try {
-    final selectedFile = await FilePicker.pickFile(
-      type: FileType.custom,
-      allowedExtensions: [
-        'jpg',
-        'jpeg',
-        'png',
-        'webp',
-        'bmp',
-      ],
+    final images = await _imageRepository.getImagesForExamination(
+      widget.examinationId,
     );
 
-    if (selectedFile == null || selectedFile.path == null) {
-      return;
-    }
-
-    final examination = _examination;
-
-    if (examination == null) {
-      return;
-    }
-
-    final modality = await _showModalityDialog();
-
-    if (modality == null) {
-      return;
-    }
-
-    final clinicalDate = await _showClinicalDateDialog(
-      examination.examinationDate,
-    );
-
-    if (clinicalDate == null) {
-      return;
-    }
-
-    final savedPath = await _imageStorage.saveImage(
-      patientId: examination.patientId,
-      examinationId: examination.id,
-      originalFilePath: selectedFile.path!,
-    );
-
-    final extension = selectedFile.extension?.toLowerCase() ?? 'unknown';
-
-    await _imageRepository.createMedicalImage(
-      id: const Uuid().v4(),
-      examinationId: examination.id,
-      filePath: savedPath,
-      originalFileName: selectedFile.name,
-      fileFormat: extension,
-      modality: modality,
-      clinicalDate: clinicalDate,
-    );
-
-    await _loadMedicalImages();
-  } catch (e) {
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Failed to add medical image: $e',
-        ),
-      ),
-    );
-  } finally {
-    if (mounted) {
-      setState(() {
-        _isAddingImage = false;
-      });
+    setState(() {
+      _medicalImages = images;
+    });
+  }
+
+  Future<void> _addMedicalImage() async {
+    setState(() {
+      _isAddingImage = true;
+    });
+
+    try {
+      final selectedFile = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'webp', 'bmp'],
+      );
+
+      if (selectedFile == null || selectedFile.path == null) {
+        return;
+      }
+
+      final examination = _examination;
+
+      if (examination == null) {
+        return;
+      }
+
+      final modality = await _showModalityDialog();
+
+      if (modality == null) {
+        return;
+      }
+
+      final clinicalDate = await _showClinicalDateDialog(
+        examination.examinationDate,
+      );
+
+      if (clinicalDate == null) {
+        return;
+      }
+
+      final savedPath = await _imageStorage.saveImage(
+        patientId: examination.patientId,
+        examinationId: examination.id,
+        originalFilePath: selectedFile.path!,
+      );
+
+      final extension = selectedFile.extension?.toLowerCase() ?? 'unknown';
+
+      await _imageRepository.createMedicalImage(
+        id: const Uuid().v4(),
+        examinationId: examination.id,
+        filePath: savedPath,
+        originalFileName: selectedFile.name,
+        fileFormat: extension,
+        modality: modality,
+        clinicalDate: clinicalDate,
+      );
+
+      await _loadMedicalImages();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add medical image: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isAddingImage = false;
+        });
+      }
     }
   }
-}
-Future<void> _deleteMedicalImage(MedicalImage image) async {
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('Delete Medical Image'),
-        content: Text(
-          'Delete "${image.originalFileName}" from this examination?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      );
-    },
-  );
 
-  if (confirmed != true) {
-    return;
+  Future<void> _deleteMedicalImage(MedicalImage image) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Medical Image'),
+          content: Text(
+            'Delete "${image.originalFileName}" from this examination?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    await _imageStorage.deleteImage(image.filePath);
+    await _imageRepository.deleteMedicalImage(image.id);
+
+    await _loadMedicalImages();
   }
 
-  await _imageStorage.deleteImage(image.filePath);
-  await _imageRepository.deleteMedicalImage(image.id);
+  Future<String?> _showModalityDialog() async {
+    const modalities = [
+      'X-Ray',
+      'CT',
+      'MRI',
+      'Ultrasound',
+      'Mammography',
+      'Other',
+    ];
 
-  await _loadMedicalImages();
-}
-Future<String?> _showModalityDialog() async {
-  const modalities = [
-    'X-Ray',
-    'CT',
-    'MRI',
-    'Ultrasound',
-    'Mammography',
-    'Other',
-  ];
+    return showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Select Modality'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: modalities.map((modality) {
+              return ListTile(
+                title: Text(modality),
+                onTap: () {
+                  Navigator.pop(context, modality);
+                },
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
 
-  return showDialog<String>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('Select Modality'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: modalities.map((modality) {
-            return ListTile(
-              title: Text(modality),
-              onTap: () {
-                Navigator.pop(context, modality);
-              },
-            );
-          }).toList(),
-        ),
-      );
-    },
-  );
-}
-Future<DateTime?> _showClinicalDateDialog(
-  DateTime initialDate,
-) async {
-  return showDatePicker(
-    context: context,
-    initialDate: initialDate,
-    firstDate: DateTime(2000),
-    lastDate: DateTime.now(),
-  );
-}
+  Future<DateTime?> _showClinicalDateDialog(DateTime initialDate) async {
+    return showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -227,9 +217,7 @@ Future<DateTime?> _showClinicalDateDialog(
       return const Scaffold(
         backgroundColor: WisteriaColors.background,
         body: Center(
-          child: CircularProgressIndicator(
-            color: WisteriaColors.primary,
-          ),
+          child: CircularProgressIndicator(color: WisteriaColors.primary),
         ),
       );
     }
@@ -243,8 +231,7 @@ Future<DateTime?> _showClinicalDateDialog(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 WisteriaBackButton(
                   label: 'Patient',
@@ -254,9 +241,7 @@ Future<DateTime?> _showClinicalDateDialog(
                   child: Center(
                     child: Text(
                       'Examination not found',
-                      style: TextStyle(
-                        color: WisteriaColors.textSecondary,
-                      ),
+                      style: TextStyle(color: WisteriaColors.textSecondary),
                     ),
                   ),
                 ),
@@ -273,10 +258,7 @@ Future<DateTime?> _showClinicalDateDialog(
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Row(
                 children: [
                   WisteriaBackButton(
@@ -292,28 +274,23 @@ Future<DateTime?> _showClinicalDateDialog(
                 padding: const EdgeInsets.all(32),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints:
-                        const BoxConstraints(maxWidth: 900),
+                    constraints: const BoxConstraints(maxWidth: 900),
                     child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           examination.examinationType,
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
-                            color:
-                                WisteriaColors.textPrimary,
+                            color: WisteriaColors.textPrimary,
                           ),
                         ),
 
                         const SizedBox(height: 8),
 
                         Text(
-                          _formatDateTime(
-                            examination.examinationDate,
-                          ),
+                          _formatDateTime(examination.examinationDate),
                           style: const TextStyle(
                             fontSize: 13,
                             color: WisteriaColors.textMuted,
@@ -324,28 +301,17 @@ Future<DateTime?> _showClinicalDateDialog(
 
                         _buildSection(
                           title: 'Examination Information',
-                          icon: Icons
-                              .medical_information_outlined,
+                          icon: Icons.medical_information_outlined,
                           children: [
-                            _buildInfoRow(
-                              'Type',
-                              examination
-                                  .examinationType,
-                            ),
-                            _buildInfoRow(
-                              'Status',
-                              examination.status,
-                            ),
+                            _buildInfoRow('Type', examination.examinationType),
+                            _buildInfoRow('Status', examination.status),
                             _buildInfoRow(
                               'Context',
-                              examination
-                                  .previousDataRange,
+                              examination.previousDataRange,
                             ),
                             _buildInfoRow(
                               'Date',
-                              _formatDateTime(
-                                examination.examinationDate,
-                              ),
+                              _formatDateTime(examination.examinationDate),
                             ),
                           ],
                         ),
@@ -354,20 +320,15 @@ Future<DateTime?> _showClinicalDateDialog(
 
                         _buildSection(
                           title: 'Doctor Notes',
-                          icon: Icons
-                              .notes_outlined,
+                          icon: Icons.notes_outlined,
                           children: [
                             Text(
-                              examination.doctorNotes
-                                          ?.trim()
-                                          .isNotEmpty ==
-                                      true
+                              examination.doctorNotes?.trim().isNotEmpty == true
                                   ? examination.doctorNotes!
                                   : 'No doctor notes added.',
                               style: const TextStyle(
                                 fontSize: 14,
-                                color:
-                                    WisteriaColors.textSecondary,
+                                color: WisteriaColors.textSecondary,
                               ),
                             ),
                           ],
@@ -376,75 +337,79 @@ Future<DateTime?> _showClinicalDateDialog(
                         const SizedBox(height: 20),
 
                         _buildSection(
-  title: 'Medical Images',
-  icon: Icons.image_outlined,
-  children: [
-    Row(
-      children: [
-        const Expanded(
-          child: Text(
-            'Images attached to this examination.',
-            style: TextStyle(
-              fontSize: 13,
-              color: WisteriaColors.textMuted,
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        FilledButton.icon(
-          onPressed: _isAddingImage ? null : _addMedicalImage,
-          icon: _isAddingImage
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                  ),
-                )
-              : const Icon(Icons.add_photo_alternate_outlined),
-          label: Text(
-            _isAddingImage ? 'Adding...' : 'Add Image',
-          ),
-        ),
-      ],
-    ),
+                          title: 'Medical Images',
+                          icon: Icons.image_outlined,
+                          children: [
+                            Row(
+                              children: [
+                                const Expanded(
+                                  child: Text(
+                                    'Images attached to this examination.',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: WisteriaColors.textMuted,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                FilledButton.icon(
+                                  onPressed: _isAddingImage
+                                      ? null
+                                      : _addMedicalImage,
+                                  icon: _isAddingImage
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : const Icon(
+                                          Icons.add_photo_alternate_outlined,
+                                        ),
+                                  label: Text(
+                                    _isAddingImage ? 'Adding...' : 'Add Image',
+                                  ),
+                                ),
+                              ],
+                            ),
 
-    const SizedBox(height: 20),
+                            const SizedBox(height: 20),
 
-    if (_medicalImages.isEmpty)
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(
-            WisteriaRadius.md,
-          ),
-          border: Border.all(
-            color: WisteriaColors.border,
-          ),
-        ),
-        child: const Column(
-          children: [
-            Icon(
-              Icons.image_not_supported_outlined,
-              size: 36,
-              color: WisteriaColors.textMuted,
-            ),
-            SizedBox(height: 12),
-            Text(
-              'No medical images added yet.',
-              style: TextStyle(
-                fontSize: 13,
-                color: WisteriaColors.textMuted,
-              ),
-            ),
-          ],
-        ),
-      )
-    else
-      ..._medicalImages.map(_buildMedicalImageCard),
-  ],
-),
+                            if (_medicalImages.isEmpty)
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(24),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                    WisteriaRadius.md,
+                                  ),
+                                  border: Border.all(
+                                    color: WisteriaColors.border,
+                                  ),
+                                ),
+                                child: const Column(
+                                  children: [
+                                    Icon(
+                                      Icons.image_not_supported_outlined,
+                                      size: 36,
+                                      color: WisteriaColors.textMuted,
+                                    ),
+                                    SizedBox(height: 12),
+                                    Text(
+                                      'No medical images added yet.',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: WisteriaColors.textMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else
+                              ..._medicalImages.map(_buildMedicalImageCard),
+                          ],
+                        ),
 
                         const SizedBox(height: 20),
 
@@ -456,8 +421,7 @@ Future<DateTime?> _showClinicalDateDialog(
                               'AI inference will be added in a later stage.',
                               style: TextStyle(
                                 fontSize: 13,
-                                color:
-                                    WisteriaColors.textMuted,
+                                color: WisteriaColors.textMuted,
                               ),
                             ),
                           ],
@@ -486,23 +450,18 @@ Future<DateTime?> _showClinicalDateDialog(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: WisteriaColors.surfaceLow,
-        borderRadius:
-            BorderRadius.circular(WisteriaRadius.lg),
-        border: Border.all(
-          color: WisteriaColors.border,
-        ),
+        borderRadius: BorderRadius.circular(WisteriaRadius.lg),
+        border: Border.all(color: WisteriaColors.border),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Icon(
                 icon,
                 size: 20,
-                color: WisteriaColors.primary
-                    .withValues(alpha: 0.7),
+                color: WisteriaColors.primary.withValues(alpha: 0.7),
               ),
               const SizedBox(width: 12),
               Text(
@@ -524,15 +483,11 @@ Future<DateTime?> _showClinicalDateDialog(
     );
   }
 
-  Widget _buildInfoRow(
-    String label,
-    String value,
-  ) {
+  Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
             width: 150,
@@ -563,12 +518,8 @@ Future<DateTime?> _showClinicalDateDialog(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(
-          WisteriaRadius.md,
-        ),
-        border: Border.all(
-          color: WisteriaColors.border,
-        ),
+        borderRadius: BorderRadius.circular(WisteriaRadius.md),
+        border: Border.all(color: WisteriaColors.border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -577,9 +528,7 @@ Future<DateTime?> _showClinicalDateDialog(
             width: 120,
             height: 90,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(
-                WisteriaRadius.md,
-              ),
+              borderRadius: BorderRadius.circular(WisteriaRadius.md),
               color: WisteriaColors.surfaceHigh,
             ),
             clipBehavior: Clip.antiAlias,
@@ -631,23 +580,19 @@ Future<DateTime?> _showClinicalDateDialog(
   }
 
   String _formatDateTime(DateTime dateTime) {
-    final day =
-        dateTime.day.toString().padLeft(2, '0');
-    final month =
-        dateTime.month.toString().padLeft(2, '0');
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final month = dateTime.month.toString().padLeft(2, '0');
     final year = dateTime.year;
 
     final hour = dateTime.hour == 0
         ? 12
         : dateTime.hour > 12
-            ? dateTime.hour - 12
-            : dateTime.hour;
+        ? dateTime.hour - 12
+        : dateTime.hour;
 
-    final minute =
-        dateTime.minute.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
 
-    final period =
-        dateTime.hour >= 12 ? 'PM' : 'AM';
+    final period = dateTime.hour >= 12 ? 'PM' : 'AM';
 
     return '$day/$month/$year • $hour:$minute $period';
   }

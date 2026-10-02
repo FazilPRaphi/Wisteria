@@ -7,29 +7,18 @@ class ExaminationRepository {
 
   ExaminationRepository(this.database);
 
-  Future<List<Examination>> getExaminationsForPatient(
-    String patientId,
-  ) {
+  Future<List<Examination>> getExaminationsForPatient(String patientId) {
     return (database.select(database.examinations)
-          ..where(
-            (examination) =>
-                examination.patientId.equals(patientId),
-          )
+          ..where((examination) => examination.patientId.equals(patientId))
           ..orderBy([
-            (examination) =>
-                OrderingTerm.desc(examination.examinationDate),
+            (examination) => OrderingTerm.desc(examination.examinationDate),
           ]))
         .get();
   }
 
-  Future<Examination?> getExaminationById(
-    String examinationId,
-  ) {
+  Future<Examination?> getExaminationById(String examinationId) {
     return (database.select(database.examinations)
-          ..where(
-            (examination) =>
-                examination.id.equals(examinationId),
-          ))
+          ..where((examination) => examination.id.equals(examinationId)))
         .getSingleOrNull();
   }
 
@@ -41,17 +30,19 @@ class ExaminationRepository {
     String? doctorNotes,
     required String previousDataRange,
   }) async {
-    await database.into(database.examinations).insert(
-      ExaminationsCompanion.insert(
-        id: id,
-        patientId: patientId,
-        examinationType: examinationType,
-        examinationDate: dateTime,
-        doctorNotes: Value(doctorNotes),
-        previousDataRange: previousDataRange,
-        status: 'DRAFT',
-      ),
-    );
+    await database
+        .into(database.examinations)
+        .insert(
+          ExaminationsCompanion.insert(
+            id: id,
+            patientId: patientId,
+            examinationType: examinationType,
+            examinationDate: dateTime,
+            doctorNotes: Value(doctorNotes),
+            previousDataRange: previousDataRange,
+            status: 'DRAFT',
+          ),
+        );
   }
 
   Future<bool> updateDoctorNotes({
@@ -60,15 +51,8 @@ class ExaminationRepository {
   }) async {
     final updatedRows =
         await (database.update(database.examinations)
-              ..where(
-                (examination) =>
-                    examination.id.equals(examinationId),
-              ))
-            .write(
-              ExaminationsCompanion(
-                doctorNotes: Value(doctorNotes),
-              ),
-            );
+              ..where((examination) => examination.id.equals(examinationId)))
+            .write(ExaminationsCompanion(doctorNotes: Value(doctorNotes)));
 
     return updatedRows > 0;
   }

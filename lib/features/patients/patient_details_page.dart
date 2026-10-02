@@ -19,33 +19,30 @@ class PatientDetailsPage extends StatefulWidget {
   });
 
   @override
-  State<PatientDetailsPage> createState() =>
-      _PatientDetailsPageState();
+  State<PatientDetailsPage> createState() => _PatientDetailsPageState();
 }
 
-class _PatientDetailsPageState
-    extends State<PatientDetailsPage> {
- late final PatientRepository _patientRepository;
-late final ExaminationRepository _examinationRepository;
+class _PatientDetailsPageState extends State<PatientDetailsPage> {
+  late final PatientRepository _patientRepository;
+  late final ExaminationRepository _examinationRepository;
 
-Patient? _patient;
-List<Examination> _examinations = [];
+  Patient? _patient;
+  List<Examination> _examinations = [];
 
-bool _isLoading = true;
+  bool _isLoading = true;
   @override
   void initState() {
     super.initState();
 
     _patientRepository = PatientRepository(widget.database);
-_examinationRepository = ExaminationRepository(widget.database);
+    _examinationRepository = ExaminationRepository(widget.database);
 
-_loadPatient();
-_loadExaminations();
+    _loadPatient();
+    _loadExaminations();
   }
 
   Future<void> _loadPatient() async {
-    final patient =
-        await _patientRepository.getPatientById(widget.patientId);
+    final patient = await _patientRepository.getPatientById(widget.patientId);
 
     if (!mounted) return;
 
@@ -56,58 +53,61 @@ _loadExaminations();
   }
 
   Future<void> _loadExaminations() async {
-  final examinations =
-      await _examinationRepository.getExaminationsForPatient(
-    widget.patientId,
-  );
+    final examinations = await _examinationRepository.getExaminationsForPatient(
+      widget.patientId,
+    );
 
-  if (!mounted) return;
+    if (!mounted) return;
 
-  setState(() {
-    _examinations = examinations;
-  });
-}
-String _formatDateTime(DateTime dateTime) {
-  final day = dateTime.day.toString().padLeft(2, '0');
-  final month = dateTime.month.toString().padLeft(2, '0');
-  final year = dateTime.year.toString();
+    setState(() {
+      _examinations = examinations;
+    });
+  }
 
-  final hour = dateTime.hour == 0
-      ? 12
-      : dateTime.hour > 12
-          ? dateTime.hour - 12
-          : dateTime.hour;
+  String _formatDateTime(DateTime dateTime) {
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final month = dateTime.month.toString().padLeft(2, '0');
+    final year = dateTime.year.toString();
 
-  final minute =
-      dateTime.minute.toString().padLeft(2, '0');
+    final hour = dateTime.hour == 0
+        ? 12
+        : dateTime.hour > 12
+        ? dateTime.hour - 12
+        : dateTime.hour;
 
-  final period = dateTime.hour >= 12 ? 'PM' : 'AM';
+    final minute = dateTime.minute.toString().padLeft(2, '0');
 
-  return '$day/$month/$year • $hour:$minute $period';
-}
+    final period = dateTime.hour >= 12 ? 'PM' : 'AM';
+
+    return '$day/$month/$year • $hour:$minute $period';
+  }
 
   Future<void> _editPatient() async {
     final patient = _patient;
 
     if (patient == null) return;
 
-    final nameController =
-        TextEditingController(text: patient.name);
+    final nameController = TextEditingController(text: patient.name);
 
-    final phoneController =
-        TextEditingController(text: patient.phoneNumber ?? '');
+    final phoneController = TextEditingController(
+      text: patient.phoneNumber ?? '',
+    );
 
-    final ageController =
-        TextEditingController(text: patient.age?.toString() ?? '');
+    final ageController = TextEditingController(
+      text: patient.age?.toString() ?? '',
+    );
 
-    final bloodGroupController =
-        TextEditingController(text: patient.bloodGroup ?? '');
+    final bloodGroupController = TextEditingController(
+      text: patient.bloodGroup ?? '',
+    );
 
-    final otherContactController =
-        TextEditingController(text: patient.otherContact ?? '');
+    final otherContactController = TextEditingController(
+      text: patient.otherContact ?? '',
+    );
 
-    final addressController =
-        TextEditingController(text: patient.address ?? '');
+    final addressController = TextEditingController(
+      text: patient.address ?? '',
+    );
 
     final formKey = GlobalKey<FormState>();
 
@@ -126,15 +126,10 @@ String _formatDateTime(DateTime dateTime) {
                   children: [
                     TextFormField(
                       controller: nameController,
-                      style: const TextStyle(
-                        color: WisteriaColors.textPrimary,
-                      ),
-                      decoration: const InputDecoration(
-                        labelText: 'Name',
-                      ),
+                      style: const TextStyle(color: WisteriaColors.textPrimary),
+                      decoration: const InputDecoration(labelText: 'Name'),
                       validator: (value) {
-                        if (value == null ||
-                            value.trim().isEmpty) {
+                        if (value == null || value.trim().isEmpty) {
                           return 'Name is required';
                         }
 
@@ -146,9 +141,7 @@ String _formatDateTime(DateTime dateTime) {
 
                     TextFormField(
                       controller: phoneController,
-                      style: const TextStyle(
-                        color: WisteriaColors.textPrimary,
-                      ),
+                      style: const TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(
                         labelText: 'Phone Number',
                       ),
@@ -159,21 +152,15 @@ String _formatDateTime(DateTime dateTime) {
                     TextFormField(
                       controller: ageController,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(
-                        color: WisteriaColors.textPrimary,
-                      ),
-                      decoration: const InputDecoration(
-                        labelText: 'Age',
-                      ),
+                      style: const TextStyle(color: WisteriaColors.textPrimary),
+                      decoration: const InputDecoration(labelText: 'Age'),
                     ),
 
                     const SizedBox(height: 16),
 
                     TextFormField(
                       controller: bloodGroupController,
-                      style: const TextStyle(
-                        color: WisteriaColors.textPrimary,
-                      ),
+                      style: const TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(
                         labelText: 'Blood Group',
                       ),
@@ -183,9 +170,7 @@ String _formatDateTime(DateTime dateTime) {
 
                     TextFormField(
                       controller: otherContactController,
-                      style: const TextStyle(
-                        color: WisteriaColors.textPrimary,
-                      ),
+                      style: const TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(
                         labelText: 'Other Contact',
                       ),
@@ -196,9 +181,7 @@ String _formatDateTime(DateTime dateTime) {
                     TextFormField(
                       controller: addressController,
                       maxLines: 3,
-                      style: const TextStyle(
-                        color: WisteriaColors.textPrimary,
-                      ),
+                      style: const TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(
                         labelText: 'Address',
                         alignLabelWithHint: true,
@@ -226,25 +209,19 @@ String _formatDateTime(DateTime dateTime) {
                 await _patientRepository.updatePatient(
                   id: patient.id,
                   name: nameController.text.trim(),
-                  phoneNumber:
-                      phoneController.text.trim().isEmpty
-                          ? null
-                          : phoneController.text.trim(),
-                  age: int.tryParse(
-                    ageController.text.trim(),
-                  ),
-                  bloodGroup:
-                      bloodGroupController.text.trim().isEmpty
-                          ? null
-                          : bloodGroupController.text.trim(),
-                  otherContact:
-                      otherContactController.text.trim().isEmpty
-                          ? null
-                          : otherContactController.text.trim(),
-                  address:
-                      addressController.text.trim().isEmpty
-                          ? null
-                          : addressController.text.trim(),
+                  phoneNumber: phoneController.text.trim().isEmpty
+                      ? null
+                      : phoneController.text.trim(),
+                  age: int.tryParse(ageController.text.trim()),
+                  bloodGroup: bloodGroupController.text.trim().isEmpty
+                      ? null
+                      : bloodGroupController.text.trim(),
+                  otherContact: otherContactController.text.trim().isEmpty
+                      ? null
+                      : otherContactController.text.trim(),
+                  address: addressController.text.trim().isEmpty
+                      ? null
+                      : addressController.text.trim(),
                 );
 
                 if (!context.mounted) return;
@@ -321,9 +298,7 @@ String _formatDateTime(DateTime dateTime) {
       return const Scaffold(
         backgroundColor: WisteriaColors.background,
         body: Center(
-          child: CircularProgressIndicator(
-            color: WisteriaColors.primary,
-          ),
+          child: CircularProgressIndicator(color: WisteriaColors.primary),
         ),
       );
     }
@@ -352,9 +327,7 @@ String _formatDateTime(DateTime dateTime) {
                 child: Center(
                   child: Text(
                     'Patient not found',
-                    style: TextStyle(
-                      color: WisteriaColors.textSecondary,
-                    ),
+                    style: TextStyle(color: WisteriaColors.textSecondary),
                   ),
                 ),
               ),
@@ -373,10 +346,7 @@ String _formatDateTime(DateTime dateTime) {
           children: [
             // ── Top bar ──
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Row(
                 children: [
                   WisteriaBackButton(
@@ -411,9 +381,7 @@ String _formatDateTime(DateTime dateTime) {
                 ),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: 900,
-                    ),
+                    constraints: const BoxConstraints(maxWidth: 900),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -426,10 +394,7 @@ String _formatDateTime(DateTime dateTime) {
                           title: 'Personal Information',
                           icon: Icons.person_outline_rounded,
                           children: [
-                            _buildInfoRow(
-                              'Name',
-                              patient.name,
-                            ),
+                            _buildInfoRow('Name', patient.name),
                             _buildInfoRow(
                               'Age',
                               patient.age?.toString() ?? 'Not provided',
@@ -460,8 +425,7 @@ String _formatDateTime(DateTime dateTime) {
                           icon: Icons.history_rounded,
                           children: const [
                             _EmptySectionContent(
-                              message:
-                                  'No previous medical information yet.',
+                              message: 'No previous medical information yet.',
                             ),
                           ],
                         ),
@@ -473,8 +437,7 @@ String _formatDateTime(DateTime dateTime) {
                           icon: Icons.science_outlined,
                           children: const [
                             _EmptySectionContent(
-                              message:
-                                  'No previous test results yet.',
+                              message: 'No previous test results yet.',
                             ),
                           ],
                         ),
@@ -486,8 +449,7 @@ String _formatDateTime(DateTime dateTime) {
                           icon: Icons.medication_outlined,
                           children: const [
                             _EmptySectionContent(
-                              message:
-                                  'No previous medications yet.',
+                              message: 'No previous medications yet.',
                             ),
                           ],
                         ),
@@ -524,9 +486,7 @@ String _formatDateTime(DateTime dateTime) {
           ),
           child: Center(
             child: Text(
-              patient.name.isNotEmpty
-                  ? patient.name[0].toUpperCase()
-                  : '?',
+              patient.name.isNotEmpty ? patient.name[0].toUpperCase() : '?',
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
@@ -539,8 +499,7 @@ String _formatDateTime(DateTime dateTime) {
         const SizedBox(width: 20),
 
         Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               patient.name,
@@ -566,168 +525,141 @@ String _formatDateTime(DateTime dateTime) {
     );
   }
 
- Widget _buildExaminationsSection(Patient patient) {
-  return _buildSection(
-    title: 'Examinations',
-    icon: Icons.medical_information_outlined,
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            'Clinical examinations',
-            style: TextStyle(
-              fontSize: 13,
-              color: WisteriaColors.textSecondary,
-            ),
-          ),
-
-          FilledButton.icon(
-            onPressed: () async {
-              final created = await Navigator.push<bool>(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CreateExaminationPage(
-                    database: widget.database,
-                    patientId: patient.id,
-                  ),
-                ),
-              );
-
-              if (created == true && mounted) {
-                await _loadExaminations();
-              }
-            },
-            icon: const Icon(
-              Icons.add,
-              size: 18,
-            ),
-            label: const Text('Create Examination'),
-          ),
-        ],
-      ),
-
-      const SizedBox(height: 20),
-
-      if (_examinations.isEmpty)
-        const _EmptySectionContent(
-          message: 'No examinations yet.',
-        )
-      else
-        ..._examinations.map(
-          (examination) =>
-              _buildExaminationItem(examination),
-        ),
-    ],
-  );
-}
-
-Widget _buildExaminationItem(
-  Examination examination,
-) {
-  return InkWell(
-    borderRadius: BorderRadius.circular(
-      WisteriaRadius.md,
-    ),
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ExaminationDetailsPage(
-            database: widget.database,
-            examinationId: examination.id,
-          ),
-        ),
-      );
-    },
-  child: Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: WisteriaColors.background,
-      borderRadius: BorderRadius.circular(
-        WisteriaRadius.md,
-      ),
-      border: Border.all(
-        color: WisteriaColors.border,
-      ),
-    ),
-    child: Row(
+  Widget _buildExaminationsSection(Patient patient) {
+    return _buildSection(
+      title: 'Examinations',
+      icon: Icons.medical_information_outlined,
       children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: WisteriaColors.primary.withValues(
-              alpha: 0.10,
-            ),
-            borderRadius: BorderRadius.circular(
-              WisteriaRadius.sm,
-            ),
-          ),
-          child: const Icon(
-            Icons.medical_information_outlined,
-            color: WisteriaColors.primary,
-          ),
-        ),
-
-        const SizedBox(width: 16),
-
-        Expanded(
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
-            children: [
-              Text(
-                examination.examinationType,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: WisteriaColors.textPrimary,
-                ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Clinical examinations',
+              style: TextStyle(
+                fontSize: 13,
+                color: WisteriaColors.textSecondary,
               ),
+            ),
 
-              const SizedBox(height: 5),
+            FilledButton.icon(
+              onPressed: () async {
+                final created = await Navigator.push<bool>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CreateExaminationPage(
+                      database: widget.database,
+                      patientId: patient.id,
+                    ),
+                  ),
+                );
 
-              Text(
-                _formatDateTime(
-                  examination.examinationDate,
-                ),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: WisteriaColors.textMuted,
-                ),
-              ),
-            ],
-          ),
+                if (created == true && mounted) {
+                  await _loadExaminations();
+                }
+              },
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Create Examination'),
+            ),
+          ],
         ),
 
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 10,
-            vertical: 5,
+        const SizedBox(height: 20),
+
+        if (_examinations.isEmpty)
+          const _EmptySectionContent(message: 'No examinations yet.')
+        else
+          ..._examinations.map(
+            (examination) => _buildExaminationItem(examination),
           ),
-          decoration: BoxDecoration(
-            color: WisteriaColors.primary.withValues(
-              alpha: 0.10,
-            ),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            examination.status,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: WisteriaColors.primary,
-            ),
-          ),
-        ),
       ],
-    ),
-  ),
-  );
-}
+    );
+  }
 
+  Widget _buildExaminationItem(Examination examination) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(WisteriaRadius.md),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ExaminationDetailsPage(
+              database: widget.database,
+              examinationId: examination.id,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: WisteriaColors.background,
+          borderRadius: BorderRadius.circular(WisteriaRadius.md),
+          border: Border.all(color: WisteriaColors.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: WisteriaColors.primary.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+              ),
+              child: const Icon(
+                Icons.medical_information_outlined,
+                color: WisteriaColors.primary,
+              ),
+            ),
+
+            const SizedBox(width: 16),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    examination.examinationType,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: WisteriaColors.textPrimary,
+                    ),
+                  ),
+
+                  const SizedBox(height: 5),
+
+                  Text(
+                    _formatDateTime(examination.examinationDate),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: WisteriaColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: WisteriaColors.primary.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                examination.status,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: WisteriaColors.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildSection({
     required String title,
@@ -773,16 +705,11 @@ Widget _buildExaminationItem(
     );
   }
 
-  Widget _buildInfoRow(
-    String label,
-    String value,
-  ) {
+  Widget _buildInfoRow(String label, String value) {
     final isProvided = value != 'Not provided';
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -802,9 +729,7 @@ Widget _buildExaminationItem(
               value,
               style: TextStyle(
                 fontSize: 14,
-                fontWeight: isProvided
-                    ? FontWeight.w400
-                    : FontWeight.w400,
+                fontWeight: isProvided ? FontWeight.w400 : FontWeight.w400,
                 color: isProvided
                     ? WisteriaColors.textPrimary
                     : WisteriaColors.textMuted.withValues(alpha: 0.6),
@@ -820,9 +745,7 @@ Widget _buildExaminationItem(
 class _EmptySectionContent extends StatelessWidget {
   final String message;
 
-  const _EmptySectionContent({
-    required this.message,
-  });
+  const _EmptySectionContent({required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -831,10 +754,7 @@ class _EmptySectionContent extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Text(
           message,
-          style: const TextStyle(
-            fontSize: 13,
-            color: WisteriaColors.textMuted,
-          ),
+          style: const TextStyle(fontSize: 13, color: WisteriaColors.textMuted),
         ),
       ),
     );
@@ -894,9 +814,7 @@ class _ActionButtonState extends State<_ActionButton> {
             child: Icon(
               widget.icon,
               size: 18,
-              color: _isHovered
-                  ? hoverColor
-                  : WisteriaColors.textSecondary,
+              color: _isHovered ? hoverColor : WisteriaColors.textSecondary,
             ),
           ),
         ),

@@ -45,29 +45,19 @@ class WisteriaColors {
   static const LinearGradient cardGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF1E1B30),
-      Color(0xFF1A1726),
-    ],
+    colors: [Color(0xFF1E1B30), Color(0xFF1A1726)],
   );
 
   static const LinearGradient accentGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF6366F1),
-      Color(0xFF818CF8),
-    ],
+    colors: [Color(0xFF6366F1), Color(0xFF818CF8)],
   );
 
   static const LinearGradient heroGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF1E1040),
-      Color(0xFF251A4A),
-      Color(0xFF1A1726),
-    ],
+    colors: [Color(0xFF1E1040), Color(0xFF251A4A), Color(0xFF1A1726)],
   );
 }
 
@@ -101,38 +91,38 @@ class WisteriaElevation {
   static List<BoxShadow> get none => [];
 
   static List<BoxShadow> get low => [
-        BoxShadow(
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-          color: Colors.black.withValues(alpha: 0.20),
-        ),
-      ];
+    BoxShadow(
+      blurRadius: 8,
+      offset: const Offset(0, 2),
+      color: Colors.black.withValues(alpha: 0.20),
+    ),
+  ];
 
   static List<BoxShadow> get medium => [
-        BoxShadow(
-          blurRadius: 16,
-          offset: const Offset(0, 4),
-          color: Colors.black.withValues(alpha: 0.25),
-        ),
-      ];
+    BoxShadow(
+      blurRadius: 16,
+      offset: const Offset(0, 4),
+      color: Colors.black.withValues(alpha: 0.25),
+    ),
+  ];
 
   static List<BoxShadow> get high => [
-        BoxShadow(
-          blurRadius: 24,
-          spreadRadius: -4,
-          offset: const Offset(0, 8),
-          color: Colors.black.withValues(alpha: 0.35),
-        ),
-      ];
+    BoxShadow(
+      blurRadius: 24,
+      spreadRadius: -4,
+      offset: const Offset(0, 8),
+      color: Colors.black.withValues(alpha: 0.35),
+    ),
+  ];
 
   static List<BoxShadow> accentGlow(Color color) => [
-        BoxShadow(
-          blurRadius: 24,
-          spreadRadius: -4,
-          offset: const Offset(0, 8),
-          color: color.withValues(alpha: 0.18),
-        ),
-      ];
+    BoxShadow(
+      blurRadius: 24,
+      spreadRadius: -4,
+      offset: const Offset(0, 8),
+      color: color.withValues(alpha: 0.18),
+    ),
+  ];
 }
 
 ThemeData buildWisteriaTheme() {
@@ -218,23 +208,14 @@ ThemeData buildWisteriaTheme() {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(WisteriaRadius.md),
-        borderSide: const BorderSide(
-          color: WisteriaColors.primary,
-          width: 1.5,
-        ),
+        borderSide: const BorderSide(color: WisteriaColors.primary, width: 1.5),
       ),
       labelStyle: const TextStyle(
         color: WisteriaColors.textSecondary,
         fontSize: 14,
       ),
-      hintStyle: const TextStyle(
-        color: WisteriaColors.textMuted,
-        fontSize: 14,
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 14,
-      ),
+      hintStyle: const TextStyle(color: WisteriaColors.textMuted, fontSize: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     ),
 
     // ── Buttons ──

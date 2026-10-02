@@ -56,9 +56,10 @@ class _WisteriaDashboardCardState extends State<WisteriaDashboardCard>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _elevationAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
+    _elevationAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
   }
 
   @override
@@ -113,8 +114,8 @@ class _WisteriaDashboardCardState extends State<WisteriaDashboardCard>
                     color: _isHovered
                         ? accent.withValues(alpha: 0.5)
                         : widget.data.isHero
-                            ? accent.withValues(alpha: 0.2)
-                            : WisteriaColors.border,
+                        ? accent.withValues(alpha: 0.2)
+                        : WisteriaColors.border,
                     width: 1,
                   ),
                   boxShadow: [
@@ -224,15 +225,13 @@ class _WisteriaDashboardCardState extends State<WisteriaDashboardCard>
         ),
       ),
       child: AnimatedSwitcher(
-  duration: const Duration(milliseconds: 200),
-  child: Icon(
-    widget.data.icon,
-    color: _isHovered
-        ? accent
-        : accent.withValues(alpha: 0.8),
-    size: widget.data.isHero ? 28 : 24,
-  ),
-),
+        duration: const Duration(milliseconds: 200),
+        child: Icon(
+          widget.data.icon,
+          color: _isHovered ? accent : accent.withValues(alpha: 0.8),
+          size: widget.data.isHero ? 28 : 24,
+        ),
+      ),
     );
   }
 }

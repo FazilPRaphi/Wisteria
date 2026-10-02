@@ -8,10 +8,7 @@ import '../shared/wisteria_back_button.dart';
 class PatientPage extends StatefulWidget {
   final WisteriaDatabase database;
 
-  const PatientPage({
-    super.key,
-    required this.database,
-  });
+  const PatientPage({super.key, required this.database});
 
   @override
   State<PatientPage> createState() => _PatientPageState();
@@ -23,8 +20,7 @@ class _PatientPageState extends State<PatientPage> {
   List<Patient> _patients = [];
   bool _isLoading = true;
 
-  final TextEditingController _searchController =
-    TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -37,7 +33,6 @@ class _PatientPageState extends State<PatientPage> {
     _loadPatients();
   }
 
-
   void _onSearchChanged() {
     final query = _searchController.text.trim();
 
@@ -49,8 +44,7 @@ class _PatientPageState extends State<PatientPage> {
   }
 
   Future<void> _searchPatients(String query) async {
-    final patients =
-        await _patientRepository.searchPatients(query);
+    final patients = await _patientRepository.searchPatients(query);
 
     if (!mounted) return;
 
@@ -105,12 +99,8 @@ class _PatientPageState extends State<PatientPage> {
                   children: [
                     TextFormField(
                       controller: nameController,
-                      style: const TextStyle(
-                        color: WisteriaColors.textPrimary,
-                      ),
-                      decoration: const InputDecoration(
-                        labelText: 'Name',
-                      ),
+                      style: const TextStyle(color: WisteriaColors.textPrimary),
+                      decoration: const InputDecoration(labelText: 'Name'),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Name is required';
@@ -124,9 +114,7 @@ class _PatientPageState extends State<PatientPage> {
 
                     TextFormField(
                       controller: phoneController,
-                      style: const TextStyle(
-                        color: WisteriaColors.textPrimary,
-                      ),
+                      style: const TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(
                         labelText: 'Phone Number',
                       ),
@@ -137,21 +125,15 @@ class _PatientPageState extends State<PatientPage> {
                     TextFormField(
                       controller: ageController,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(
-                        color: WisteriaColors.textPrimary,
-                      ),
-                      decoration: const InputDecoration(
-                        labelText: 'Age',
-                      ),
+                      style: const TextStyle(color: WisteriaColors.textPrimary),
+                      decoration: const InputDecoration(labelText: 'Age'),
                     ),
 
                     const SizedBox(height: 16),
 
                     TextFormField(
                       controller: bloodGroupController,
-                      style: const TextStyle(
-                        color: WisteriaColors.textPrimary,
-                      ),
+                      style: const TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(
                         labelText: 'Blood Group',
                       ),
@@ -161,9 +143,7 @@ class _PatientPageState extends State<PatientPage> {
 
                     TextFormField(
                       controller: otherContactController,
-                      style: const TextStyle(
-                        color: WisteriaColors.textPrimary,
-                      ),
+                      style: const TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(
                         labelText: 'Other Contact',
                       ),
@@ -174,9 +154,7 @@ class _PatientPageState extends State<PatientPage> {
                     TextFormField(
                       controller: addressController,
                       maxLines: 3,
-                      style: const TextStyle(
-                        color: WisteriaColors.textPrimary,
-                      ),
+                      style: const TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(
                         labelText: 'Address',
                         alignLabelWithHint: true,
@@ -211,18 +189,15 @@ class _PatientPageState extends State<PatientPage> {
                       ? null
                       : phoneController.text.trim(),
                   age: int.tryParse(ageController.text.trim()),
-                  bloodGroup:
-                      bloodGroupController.text.trim().isEmpty
-                          ? null
-                          : bloodGroupController.text.trim(),
-                  otherContact:
-                      otherContactController.text.trim().isEmpty
-                          ? null
-                          : otherContactController.text.trim(),
-                  address:
-                      addressController.text.trim().isEmpty
-                          ? null
-                          : addressController.text.trim(),
+                  bloodGroup: bloodGroupController.text.trim().isEmpty
+                      ? null
+                      : bloodGroupController.text.trim(),
+                  otherContact: otherContactController.text.trim().isEmpty
+                      ? null
+                      : otherContactController.text.trim(),
+                  address: addressController.text.trim().isEmpty
+                      ? null
+                      : addressController.text.trim(),
                 );
 
                 if (!context.mounted) return;
@@ -257,10 +232,7 @@ class _PatientPageState extends State<PatientPage> {
           children: [
             // ── Top bar ──
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 16,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Row(
                 children: [
                   const WisteriaBackButton(),
@@ -289,14 +261,14 @@ class _PatientPageState extends State<PatientPage> {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: WisteriaColors.primary
-                              .withValues(alpha: 0.10),
+                          color: WisteriaColors.primary.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(
                             WisteriaRadius.md,
                           ),
                           border: Border.all(
-                            color: WisteriaColors.primary
-                                .withValues(alpha: 0.15),
+                            color: WisteriaColors.primary.withValues(
+                              alpha: 0.15,
+                            ),
                           ),
                         ),
                         child: const Icon(
@@ -330,9 +302,7 @@ class _PatientPageState extends State<PatientPage> {
                       ),
                       const Spacer(),
                       // Add button
-                      _AddPatientButton(
-                        onTap: _showAddPatientDialog,
-                      ),
+                      _AddPatientButton(onTap: _showAddPatientDialog),
                     ],
                   ),
 
@@ -381,12 +351,12 @@ class _PatientPageState extends State<PatientPage> {
                       ),
                     )
                   : _patients.isEmpty
-                      ? _buildEmptyState(
-                          message: _searchController.text.isEmpty
-                              ? 'No patients yet'
-                              : 'No patients found',
-                        )
-                      : _buildPatientList(),
+                  ? _buildEmptyState(
+                      message: _searchController.text.isEmpty
+                          ? 'No patients yet'
+                          : 'No patients found',
+                    )
+                  : _buildPatientList(),
             ),
           ],
         ),
@@ -431,10 +401,7 @@ class _PatientPageState extends State<PatientPage> {
 
           const Text(
             'Add your first patient to get started.',
-            style: TextStyle(
-              fontSize: 13,
-              color: WisteriaColors.textMuted,
-            ),
+            style: TextStyle(fontSize: 13, color: WisteriaColors.textMuted),
           ),
 
           const SizedBox(height: 24),
@@ -453,7 +420,7 @@ class _PatientPageState extends State<PatientPage> {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       itemCount: _patients.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final patient = _patients[index];
 
@@ -465,16 +432,13 @@ class _PatientPageState extends State<PatientPage> {
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
                     PatientDetailsPage(
-                  database: widget.database,
-                  patientId: patient.id,
-                ),
+                      database: widget.database,
+                      patientId: patient.id,
+                    ),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: child,
-                  );
-                },
+                      return FadeTransition(opacity: animation, child: child);
+                    },
                 transitionDuration: const Duration(milliseconds: 200),
               ),
             );
@@ -494,10 +458,7 @@ class _PatientListItem extends StatefulWidget {
   final Patient patient;
   final VoidCallback onTap;
 
-  const _PatientListItem({
-    required this.patient,
-    required this.onTap,
-  });
+  const _PatientListItem({required this.patient, required this.onTap});
 
   @override
   State<_PatientListItem> createState() => _PatientListItemState();
@@ -518,10 +479,7 @@ class _PatientListItemState extends State<_PatientListItem> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 18,
-            vertical: 14,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
           decoration: BoxDecoration(
             color: _isHovered
                 ? WisteriaColors.surfaceContainer
@@ -575,12 +533,10 @@ class _PatientListItemState extends State<_PatientListItem> {
                     const SizedBox(height: 3),
                     Text(
                       [
-                        if (patient.age != null)
-                          'Age: ${patient.age}',
+                        if (patient.age != null) 'Age: ${patient.age}',
                         if (patient.bloodGroup != null)
                           'Blood: ${patient.bloodGroup}',
-                        if (patient.phoneNumber != null)
-                          patient.phoneNumber!,
+                        if (patient.phoneNumber != null) patient.phoneNumber!,
                       ].join(' • '),
                       style: const TextStyle(
                         fontSize: 12,
@@ -630,10 +586,7 @@ class _AddPatientButtonState extends State<_AddPatientButton> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 18,
-            vertical: 10,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
           decoration: BoxDecoration(
             color: _isHovered
                 ? WisteriaColors.primaryMuted

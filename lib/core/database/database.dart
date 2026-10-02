@@ -28,9 +28,7 @@ part 'database.g.dart';
 )
 class WisteriaDatabase extends _$WisteriaDatabase {
   WisteriaDatabase([QueryExecutor? executor])
-      : super(
-          executor ?? driftDatabase(name: 'wisteria_v2'),
-        );
+    : super(executor ?? driftDatabase(name: 'wisteria_v2'));
 
   @override
   int get schemaVersion => 2;
@@ -43,20 +41,11 @@ class WisteriaDatabase extends _$WisteriaDatabase {
       },
       onUpgrade: (Migrator m, int from, int to) async {
         if (from < 2) {
-          await m.addColumn(
-            doctorProfiles,
-            doctorProfiles.email,
-          );
+          await m.addColumn(doctorProfiles, doctorProfiles.email);
 
-          await m.addColumn(
-            doctorProfiles,
-            doctorProfiles.documentPath,
-          );
+          await m.addColumn(doctorProfiles, doctorProfiles.documentPath);
 
-          await m.addColumn(
-            doctorProfiles,
-            doctorProfiles.documentFileName,
-          );
+          await m.addColumn(doctorProfiles, doctorProfiles.documentFileName);
         }
       },
     );

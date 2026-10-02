@@ -1,25 +1,21 @@
 import 'package:flutter/material.dart';
-
+import 'features/models/medical_model_page.dart';
 import 'core/database/database.dart';
 import 'core/theme/wisteria_theme.dart';
 import 'features/dashboard/dashboard_page.dart';
 import 'features/doctor/doctor_profile_page.dart';
 import 'features/patients/patient_page.dart';
 import 'features/shared/placeholder_page.dart';
+import 'features/models/model_inference_test_page.dart';
 
 class WisteriaAppShell extends StatelessWidget {
   final WisteriaDatabase database;
 
-  const WisteriaAppShell({
-    super.key,
-    required this.database,
-  });
+  const WisteriaAppShell({super.key, required this.database});
 
   @override
   Widget build(BuildContext context) {
-    return DashboardPage(
-      onNavigate: (page) => _navigateTo(context, page),
-    );
+    return DashboardPage(onNavigate: (page) => _navigateTo(context, page));
   }
 
   void _navigateTo(BuildContext context, String page) {
@@ -43,18 +39,13 @@ class WisteriaAppShell extends StatelessWidget {
         break;
 
       case 'models':
-        targetPage = const PlaceholderPage(
-          title: 'Installed Models',
-          subtitle: 'Manage your installed AI models and neural engines.',
-          icon: Icons.memory_rounded,
-        );
+        targetPage = MedicalModelPage(database: database);
         break;
 
       case 'sync':
         targetPage = const PlaceholderPage(
           title: 'Data Synchronization',
-          subtitle:
-              'Synchronize clinical data across your workstations.',
+          subtitle: 'Synchronize clinical data across your workstations.',
           icon: Icons.sync_rounded,
         );
         break;
@@ -85,13 +76,8 @@ class WisteriaAppShell extends StatelessWidget {
         );
         break;
 
-      case 'settings':
-        targetPage = const PlaceholderPage(
-          title: 'System Configuration',
-          subtitle:
-              'Configure hardware acceleration, PACS connections, and preferences.',
-          icon: Icons.settings_rounded,
-        );
+      case 'test_model':
+        targetPage = const ModelInferenceTestPage();
         break;
 
       default:
@@ -100,10 +86,8 @@ class WisteriaAppShell extends StatelessWidget {
 
     Navigator.of(context).push(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            targetPage,
-        transitionsBuilder:
-            (context, animation, secondaryAnimation, child) {
+        pageBuilder: (context, animation, secondaryAnimation) => targetPage,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
             opacity: CurvedAnimation(
               parent: animation,
