@@ -294,10 +294,12 @@ class _PatientDetailsPageState extends State<PatientDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
+
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: WisteriaColors.background,
-        body: Center(
+      return Scaffold(
+        backgroundColor: colors.background,
+        body: const Center(
           child: CircularProgressIndicator(color: WisteriaColors.primary),
         ),
       );
@@ -305,7 +307,7 @@ class _PatientDetailsPageState extends State<PatientDetailsPage> {
 
     if (_patient == null) {
       return Scaffold(
-        backgroundColor: WisteriaColors.background,
+        backgroundColor: colors.background,
         body: SafeArea(
           child: Column(
             children: [
@@ -340,7 +342,7 @@ class _PatientDetailsPageState extends State<PatientDetailsPage> {
     final patient = _patient!;
 
     return Scaffold(
-      backgroundColor: WisteriaColors.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [

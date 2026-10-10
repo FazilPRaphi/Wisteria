@@ -80,7 +80,8 @@ class _WisteriaDashboardCardState extends State<WisteriaDashboardCard>
 
   @override
   Widget build(BuildContext context) {
-    final accent = widget.data.accentColor ?? WisteriaColors.primary;
+    final colors = WisteriaColors.of(context);
+    final accent = widget.data.accentColor ?? colors.primary;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -104,18 +105,18 @@ class _WisteriaDashboardCardState extends State<WisteriaDashboardCard>
                           end: Alignment.bottomRight,
                           colors: [
                             accent.withValues(alpha: 0.12),
-                            WisteriaColors.surfaceLow,
-                            WisteriaColors.surfaceLow,
+                            colors.surfaceLow,
+                            colors.surfaceLow,
                           ],
                         )
-                      : WisteriaColors.cardGradient,
+                      : colors.cardGradient,
                   borderRadius: BorderRadius.circular(WisteriaRadius.lg),
                   border: Border.all(
                     color: _isHovered
                         ? accent.withValues(alpha: 0.5)
                         : widget.data.isHero
                         ? accent.withValues(alpha: 0.2)
-                        : WisteriaColors.border,
+                        : colors.border,
                     width: 1,
                   ),
                   boxShadow: [
@@ -166,10 +167,10 @@ class _WisteriaDashboardCardState extends State<WisteriaDashboardCard>
                   const SizedBox(height: 4),
                   Text(
                     widget.data.metricLabel!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
-                      color: WisteriaColors.textMuted,
+                      color: colors.textMuted,
                     ),
                   ),
                 ],
@@ -179,10 +180,10 @@ class _WisteriaDashboardCardState extends State<WisteriaDashboardCard>
               // Title
               Text(
                 widget.data.title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: WisteriaColors.textPrimary,
+                  color: colors.textPrimary,
                   letterSpacing: 0.2,
                 ),
               ),
@@ -192,10 +193,10 @@ class _WisteriaDashboardCardState extends State<WisteriaDashboardCard>
               // Subtitle
               Text(
                 widget.data.subtitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
-                  color: WisteriaColors.textMuted,
+                  color: colors.textMuted,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

@@ -25,7 +25,7 @@ class MainWorkspacePanel extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── Greeting ──
-                  _buildGreeting(),
+                  _buildGreeting(context),
 
                   const SizedBox(height: 48),
 
@@ -42,16 +42,17 @@ class MainWorkspacePanel extends StatelessWidget {
     );
   }
 
-  Widget _buildGreeting() {
+  Widget _buildGreeting(BuildContext context) {
+    final colors = WisteriaColors.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Welcome back, Doctor',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w700,
-            color: WisteriaColors.textPrimary,
+            color: colors.textPrimary,
             letterSpacing: -0.3,
           ),
         ),
@@ -61,7 +62,7 @@ class MainWorkspacePanel extends StatelessWidget {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w400,
-            color: WisteriaColors.textSecondary.withValues(alpha: 0.8),
+            color: colors.textSecondary.withValues(alpha: 0.8),
           ),
         ),
       ],
@@ -70,28 +71,32 @@ class MainWorkspacePanel extends StatelessWidget {
 
   Widget _buildMainCards(BuildContext context, double maxWidth) {
     final isNarrow = maxWidth < 700;
+    final colors = WisteriaColors.of(context);
 
     if (isNarrow) {
       return Column(
         children: [
           Expanded(
             child: _WorkspaceHeroCard(
-              title: 'Patients',
-              subtitle: 'Manage patient records, registrations, and profiles',
-              icon: Icons.people_rounded,
-              accentColor: WisteriaColors.primary,
-              onTap: () => _navigateToPatients(context),
+              title: 'New Patient',
+              subtitle: 'Register a new patient record',
+              icon: Icons.person_add_rounded,
+              accentColor: WisteriaColors.pink,
+              tintColor: WisteriaColors.pink,
+              imagePath: 'assets/images/new_patients.jpg',
+              onTap: () => _navigateToNewPatient(context),
             ),
           ),
           const SizedBox(height: 20),
           Expanded(
             child: _WorkspaceHeroCard(
-              title: 'AI Workplace',
-              subtitle:
-                  'Run AI-assisted diagnostics on medical imaging studies',
-              icon: Icons.auto_awesome_rounded,
-              accentColor: WisteriaColors.tertiary,
-              onTap: () => _navigateToAIWorkplace(context),
+              title: 'Registered Patients',
+              subtitle: 'Browse and search patient directory',
+              icon: Icons.folder_shared_rounded,
+              accentColor: colors.primary,
+              tintColor: colors.primary,
+              imagePath: 'assets/images/registered_patients.jpg',
+              onTap: () => _navigateToRegisteredPatients(context),
             ),
           ),
         ],
@@ -102,32 +107,36 @@ class MainWorkspacePanel extends StatelessWidget {
       children: [
         Expanded(
           child: _WorkspaceHeroCard(
-            title: 'Patients',
-            subtitle: 'Manage patient records, registrations, and profiles',
-            icon: Icons.people_rounded,
-            accentColor: WisteriaColors.primary,
-            onTap: () => _navigateToPatients(context),
+            title: 'New Patient',
+            subtitle: 'Register a new patient record',
+            icon: Icons.person_add_rounded,
+            accentColor: WisteriaColors.pink,
+            tintColor: WisteriaColors.pink,
+            imagePath: 'assets/images/new_patients.jpg',
+            onTap: () => _navigateToNewPatient(context),
           ),
         ),
         const SizedBox(width: 24),
         Expanded(
           child: _WorkspaceHeroCard(
-            title: 'AI Workplace',
-            subtitle: 'Run AI-assisted diagnostics on medical imaging studies',
-            icon: Icons.auto_awesome_rounded,
-            accentColor: WisteriaColors.tertiary,
-            onTap: () => _navigateToAIWorkplace(context),
+            title: 'Registered Patients',
+            subtitle: 'Browse and search patient directory',
+            icon: Icons.folder_shared_rounded,
+            accentColor: colors.primary,
+            tintColor: colors.primary,
+            imagePath: 'assets/images/registered_patients.jpg',
+            onTap: () => _navigateToRegisteredPatients(context),
           ),
         ),
       ],
     );
   }
 
-  void _navigateToPatients(BuildContext context) {
+  void _navigateToNewPatient(BuildContext context) {
     Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            PatientPage(database: database),
+            PatientPage(database: database, autoOpenAddPatient: true),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
             position:
@@ -149,14 +158,11 @@ class MainWorkspacePanel extends StatelessWidget {
     );
   }
 
-  void _navigateToAIWorkplace(BuildContext context) {
-    // AI Workplace navigates to the patient workspace since examinations
-    // are patient-linked. This provides a clear entry point to the
-    // existing examination + inference workflow.
+  void _navigateToRegisteredPatients(BuildContext context) {
     Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            PatientPage(database: database),
+            PatientPage(database: database, initialShowRegistry: true),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
             position:
@@ -185,6 +191,8 @@ class _WorkspaceHeroCard extends StatefulWidget {
   final String subtitle;
   final IconData icon;
   final Color accentColor;
+  final Color? tintColor;
+  final String? imagePath;
   final VoidCallback onTap;
 
   const _WorkspaceHeroCard({
@@ -192,6 +200,8 @@ class _WorkspaceHeroCard extends StatefulWidget {
     required this.subtitle,
     required this.icon,
     required this.accentColor,
+    this.tintColor,
+    this.imagePath,
     required this.onTap,
   });
 
@@ -209,7 +219,7 @@ class _WorkspaceHeroCardState extends State<_WorkspaceHeroCard>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 200),
       vsync: this,
     );
     _animation = Tween<double>(
@@ -226,6 +236,10 @@ class _WorkspaceHeroCardState extends State<_WorkspaceHeroCard>
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isPink = widget.tintColor == WisteriaColors.pink;
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) {
@@ -242,45 +256,133 @@ class _WorkspaceHeroCardState extends State<_WorkspaceHeroCard>
           animation: _animation,
           builder: (context, child) {
             final t = _animation.value;
+            final hoverBorderColor = widget.accentColor.withValues(alpha: 0.65);
+            final borderColor = Color.lerp(
+              colors.border,
+              hoverBorderColor,
+              t,
+            )!;
+
             return Transform.translate(
-              offset: Offset(0, -3 * t),
+              offset: Offset(0, -1 * t),
               child: Container(
-                padding: const EdgeInsets.all(36),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      widget.accentColor.withValues(alpha: 0.10 + (0.05 * t)),
-                      WisteriaColors.surfaceLow,
-                      WisteriaColors.surfaceLow,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(WisteriaRadius.xl),
+                  borderRadius: BorderRadius.zero,
                   border: Border.all(
-                    color: _isHovered
-                        ? widget.accentColor.withValues(alpha: 0.5)
-                        : widget.accentColor.withValues(alpha: 0.18),
+                    color: borderColor,
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      blurRadius: 12 + (20 * t),
-                      spreadRadius: -4,
-                      offset: Offset(0, 4 + (8 * t)),
-                      color: Colors.black.withValues(alpha: 0.20 + (0.10 * t)),
-                    ),
-                    BoxShadow(
-                      blurRadius: 32 + (12 * t),
-                      spreadRadius: -8,
-                      offset: Offset(0, 6 + (6 * t)),
-                      color: widget.accentColor.withValues(
-                        alpha: 0.06 + (0.12 * t),
+                      blurRadius: isDark ? (6 + (5 * t)) : (4 + (4 * t)),
+                      offset: Offset(0, isDark ? (2 + (2 * t)) : (1 + (2 * t))),
+                      color: Colors.black.withValues(
+                        alpha: isDark ? (0.22 + 0.08 * t) : (0.04 + 0.04 * t),
                       ),
                     ),
                   ],
                 ),
-                child: child,
+                child: ClipRect(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Base surface fallback
+                      Container(
+                        color: isDark
+                            ? (isPink
+                                ? const Color(0xFF1E1722)
+                                : colors.surface)
+                            : colors.surface,
+                      ),
+                      // Background photo
+                      if (widget.imagePath != null)
+                        Positioned.fill(
+                          child: Image.asset(
+                            widget.imagePath!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const SizedBox.shrink(),
+                          ),
+                        ),
+                      // Subtle pink or blue/teal tinted gradient overlay: clear at top, gentle ramp near bottom
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              stops: const [0.0, 0.40, 0.70, 1.0],
+                              colors: isDark
+                                  ? (isPink
+                                      ? [
+                                          const Color(0xFF96162C).withValues(
+                                            alpha: 0.10,
+                                          ),
+                                          const Color(0xFF261922).withValues(
+                                            alpha: 0.30,
+                                          ),
+                                          const Color(0xFF20161E).withValues(
+                                            alpha: 0.58,
+                                          ),
+                                          const Color(0xFF16151E).withValues(
+                                            alpha: 0.82,
+                                          ),
+                                        ]
+                                      : [
+                                          const Color(0xFF098FA6).withValues(
+                                            alpha: 0.08,
+                                          ),
+                                          const Color(0xFF11222D).withValues(
+                                            alpha: 0.28,
+                                          ),
+                                          const Color(0xFF13222E).withValues(
+                                            alpha: 0.55,
+                                          ),
+                                          const Color(0xFF111923).withValues(
+                                            alpha: 0.80,
+                                          ),
+                                        ])
+                                  : (isPink
+                                      ? [
+                                          const Color(0xFFC998A2).withValues(
+                                            alpha: 0.06,
+                                          ),
+                                          const Color(0xFFF7EBEF).withValues(
+                                            alpha: 0.18,
+                                          ),
+                                          const Color(0xFFFBF2F4).withValues(
+                                            alpha: 0.52,
+                                          ),
+                                          const Color(0xFFFFFFFF).withValues(
+                                            alpha: 0.85,
+                                          ),
+                                        ]
+                                      : [
+                                          const Color(0xFF098FA6).withValues(
+                                            alpha: 0.04,
+                                          ),
+                                          const Color(0xFFE4F0F3).withValues(
+                                            alpha: 0.18,
+                                          ),
+                                          const Color(0xFFEAF4F6).withValues(
+                                            alpha: 0.52,
+                                          ),
+                                          const Color(0xFFFFFFFF).withValues(
+                                            alpha: 0.85,
+                                          ),
+                                        ]),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Foreground card content with exact existing layout
+                      Padding(
+                        padding: const EdgeInsets.all(36),
+                        child: child,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             );
           },
@@ -288,17 +390,17 @@ class _WorkspaceHeroCardState extends State<_WorkspaceHeroCard>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Icon ──
-              _buildIcon(),
+              _buildIcon(isDark),
 
               const Spacer(),
 
               // ── Title ──
               Text(
                 widget.title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: WisteriaColors.textPrimary,
+                  color: colors.textPrimary,
                   letterSpacing: -0.2,
                 ),
               ),
@@ -308,10 +410,10 @@ class _WorkspaceHeroCardState extends State<_WorkspaceHeroCard>
               // ── Subtitle ──
               Text(
                 widget.subtitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: WisteriaColors.textSecondary,
+                  color: colors.textSecondary,
                   height: 1.4,
                 ),
                 maxLines: 2,
@@ -346,28 +448,34 @@ class _WorkspaceHeroCardState extends State<_WorkspaceHeroCard>
     );
   }
 
-  Widget _buildIcon() {
+  Widget _buildIcon(bool isDark) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       width: 64,
       height: 64,
       decoration: BoxDecoration(
-        color: _isHovered
-            ? widget.accentColor.withValues(alpha: 0.18)
-            : widget.accentColor.withValues(alpha: 0.10),
+        color: isDark
+            ? const Color(0xFF192831).withValues(alpha: _isHovered ? 0.90 : 0.80)
+            : Colors.white.withValues(alpha: _isHovered ? 0.95 : 0.88),
         borderRadius: BorderRadius.circular(WisteriaRadius.lg),
         border: Border.all(
           color: _isHovered
-              ? widget.accentColor.withValues(alpha: 0.3)
-              : Colors.transparent,
+              ? widget.accentColor.withValues(alpha: 0.50)
+              : widget.accentColor.withValues(alpha: 0.25),
+          width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
+          ),
+        ],
       ),
       child: Icon(
         widget.icon,
         size: 30,
-        color: _isHovered
-            ? widget.accentColor
-            : widget.accentColor.withValues(alpha: 0.8),
+        color: widget.accentColor,
       ),
     );
   }

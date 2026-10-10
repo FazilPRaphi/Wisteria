@@ -2,63 +2,280 @@ import 'package:flutter/material.dart';
 
 /// Wisteria Design System
 ///
-/// Premium dark clinical AI workstation theme.
-/// Deep dark backgrounds, indigo/violet accents,
-/// layered surfaces, crisp typography.
+/// Centralized clinical AI workstation theme system supporting
+/// both Dark and Light modes.
+///
+/// Color palettes are defined centrally in [WisteriaColorPalette] and accessible
+/// via [WisteriaColors.of(context)].
+/// Theme switching is managed through [WisteriaThemeController].
+
+/// Structured color palette for Wisteria themes.
+class WisteriaColorPalette {
+  final Brightness brightness;
+
+  // ── Background layers ──
+  final Color background;
+  final Color surfaceLowest;
+  final Color surfaceLow;
+  final Color surface;
+  final Color surfaceContainer;
+  final Color surfaceHigh;
+  final Color surfaceHighest;
+
+  // ── Accent colors ──
+  final Color primary;
+  final Color primaryMuted;
+  final Color secondary;
+  final Color tertiary;
+  final Color primaryContainer;
+
+  // ── Text colors ──
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textMuted;
+  final Color textOnPrimary;
+
+  // ── Border colors ──
+  final Color border;
+  final Color borderSubtle;
+  final Color borderFocus;
+
+  // ── Semantic colors ──
+  final Color success;
+  final Color warning;
+  final Color error;
+  final Color info;
+
+  // ── Tint colors ──
+  final Color pink;
+  final Color burgundy;
+  final Color mutedRose;
+
+  // ── Gradient presets ──
+  final LinearGradient cardGradient;
+  final LinearGradient accentGradient;
+  final LinearGradient heroGradient;
+
+  const WisteriaColorPalette({
+    required this.brightness,
+    required this.background,
+    required this.surfaceLowest,
+    required this.surfaceLow,
+    required this.surface,
+    required this.surfaceContainer,
+    required this.surfaceHigh,
+    required this.surfaceHighest,
+    required this.primary,
+    required this.primaryMuted,
+    required this.secondary,
+    required this.tertiary,
+    required this.primaryContainer,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textMuted,
+    required this.textOnPrimary,
+    required this.border,
+    required this.borderSubtle,
+    required this.borderFocus,
+    required this.success,
+    required this.warning,
+    required this.error,
+    required this.info,
+    required this.pink,
+    required this.burgundy,
+    required this.mutedRose,
+    required this.cardGradient,
+    required this.accentGradient,
+    required this.heroGradient,
+  });
+}
+
+/// Centralized color repository for Wisteria.
+///
+/// Preserves the exact dark theme colors while establishing the light theme structure.
+/// Provides [WisteriaColors.of(context)] for theme-aware dynamic color access,
+/// while maintaining static constants for backward compatibility.
 class WisteriaColors {
   WisteriaColors._();
 
-  // ── Background layers ──
-  static const Color background = Color(0xFF0F0D1A);
-  static const Color surfaceLowest = Color(0xFF0E0C19);
-  static const Color surfaceLow = Color(0xFF1A1726);
-  static const Color surface = Color(0xFF1C1A27);
-  static const Color surfaceContainer = Color(0xFF201E2C);
-  static const Color surfaceHigh = Color(0xFF2B2836);
-  static const Color surfaceHighest = Color(0xFF363342);
+  // ── Tint colors ──
+  static const Color pink = Color(0xFFC998A2);
+  static const Color burgundy = Color(0xFF96162C);
+  static const Color mutedRose = Color(0xFFAF6A6A);
 
-  // ── Accent colors ──
-  static const Color primary = Color(0xFF818CF8);
-  static const Color primaryMuted = Color(0xFF6366F1);
-  static const Color secondary = Color(0xFF6D28D9);
-  static const Color tertiary = Color(0xFFA78BFA);
-  static const Color primaryContainer = Color(0xFF2F3AA3);
+  // ── Preserved Dark Theme Palette ──
+  static const WisteriaColorPalette darkPalette = WisteriaColorPalette(
+    brightness: Brightness.dark,
+    background: Color(0xFF111923),
+    surfaceLowest: Color(0xFF0D141C),
+    surfaceLow: Color(0xFF15202A),
+    surface: Color(0xFF1A2632),
+    surfaceContainer: Color(0xFF1F2D3A),
+    surfaceHigh: Color(0xFF263746),
+    surfaceHighest: Color(0xFF2E4152),
+    primary: Color(0xFF098FA6),
+    primaryMuted: Color(0xFF07788C),
+    secondary: Color(0xFF0D9488),
+    tertiary: Color(0xFF2DD4BF),
+    primaryContainer: Color(0xFF123942),
+    textPrimary: Color(0xFFF1F5F7),
+    textSecondary: Color(0xFFA6B5C0),
+    textMuted: Color(0xFF6F818D),
+    textOnPrimary: Color(0xFFFFFFFF),
+    border: Color(0xFF2B3B48),
+    borderSubtle: Color(0xFF1F2C37),
+    borderFocus: Color(0xFF098FA6),
+    success: Color(0xFF34D399),
+    warning: Color(0xFFFBBF24),
+    error: Color(0xFFEF4444),
+    info: Color(0xFF098FA6),
+    pink: Color(0xFFC998A2),
+    burgundy: Color(0xFF96162C),
+    mutedRose: Color(0xFFAF6A6A),
+    cardGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF202E3B), Color(0xFF1A2632)],
+    ),
+    accentGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF07788C), Color(0xFF098FA6)],
+    ),
+    heroGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF15222C), Color(0xFF192733), Color(0xFF111923)],
+    ),
+  );
 
-  // ── Text colors ──
-  static const Color textPrimary = Color(0xFFF8FAFC);
-  static const Color textSecondary = Color(0xFF94A3B8);
-  static const Color textMuted = Color(0xFF64748B);
-  static const Color textOnPrimary = Color(0xFFF8FAFC);
+  // ── Light Theme Palette ──
+  static const WisteriaColorPalette lightPalette = WisteriaColorPalette(
+    brightness: Brightness.light,
+    background: Color(0xFFF0F5F6),
+    surfaceLowest: Color(0xFFF7F4EF),
+    surfaceLow: Color(0xFFE8F0F2),
+    surface: Color(0xFFF7F4EF),
+    surfaceContainer: Color(0xFFE1EAEF),
+    surfaceHigh: Color(0xFFD8E3E8),
+    surfaceHighest: Color(0xFFCFD9DE),
+    primary: Color(0xFF098FA6),
+    primaryMuted: Color(0xFF07788C),
+    secondary: Color(0xFF0D9488),
+    tertiary: Color(0xFF0891B2),
+    primaryContainer: Color(0xFFE0F4F7),
+    textPrimary: Color(0xFF202B35),
+    textSecondary: Color(0xFF667783),
+    textMuted: Color(0xFF8697A1),
+    textOnPrimary: Color(0xFFFFFFFF),
+    border: Color(0xFFD9E4E8),
+    borderSubtle: Color(0xFFE4ECEF),
+    borderFocus: Color(0xFF098FA6),
+    success: Color(0xFF10B981),
+    warning: Color(0xFFF59E0B),
+    error: Color(0xFFEF4444),
+    info: Color(0xFF098FA6),
+    pink: Color(0xFFC998A2),
+    burgundy: Color(0xFF96162C),
+    mutedRose: Color(0xFFAF6A6A),
+    cardGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFFFFFFFF), Color(0xFFF5F9FA)],
+    ),
+    accentGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF07788C), Color(0xFF098FA6)],
+    ),
+    heroGradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFFE3EFF2), Color(0xFFEAF2F4), Color(0xFFF0F5F6)],
+    ),
+  );
 
-  // ── Border colors ──
-  static const Color border = Color(0xFF2E2A42);
-  static const Color borderSubtle = Color(0xFF242038);
-  static const Color borderFocus = Color(0xFF818CF8);
+  /// Access the active color palette dynamically for the given [BuildContext].
+  static WisteriaColorPalette of(BuildContext context) {
+    final theme = Theme.of(context);
+    return theme.brightness == Brightness.dark ? darkPalette : lightPalette;
+  }
 
-  // ── Semantic colors ──
+  /// Access the current palette according to [WisteriaThemeController].
+  static WisteriaColorPalette get current =>
+      WisteriaThemeController.currentPalette;
+
+  // ── Backward-compatible compile-time constants (Dark theme baseline) ──
+  static const Color background = Color(0xFF111923);
+  static const Color surfaceLowest = Color(0xFF0D141C);
+  static const Color surfaceLow = Color(0xFF15202A);
+  static const Color surface = Color(0xFF1A2632);
+  static const Color surfaceContainer = Color(0xFF1F2D3A);
+  static const Color surfaceHigh = Color(0xFF263746);
+  static const Color surfaceHighest = Color(0xFF2E4152);
+
+  static const Color primary = Color(0xFF098FA6);
+  static const Color primaryMuted = Color(0xFF07788C);
+  static const Color secondary = Color(0xFF0D9488);
+  static const Color tertiary = Color(0xFF2DD4BF);
+  static const Color primaryContainer = Color(0xFF123942);
+
+  static const Color textPrimary = Color(0xFFF1F5F7);
+  static const Color textSecondary = Color(0xFFA6B5C0);
+  static const Color textMuted = Color(0xFF6F818D);
+  static const Color textOnPrimary = Color(0xFFFFFFFF);
+
+  static const Color border = Color(0xFF2B3B48);
+  static const Color borderSubtle = Color(0xFF1F2C37);
+  static const Color borderFocus = Color(0xFF098FA6);
+
   static const Color success = Color(0xFF34D399);
   static const Color warning = Color(0xFFFBBF24);
   static const Color error = Color(0xFFEF4444);
-  static const Color info = Color(0xFF38BDF8);
+  static const Color info = Color(0xFF098FA6);
 
-  // ── Gradient presets ──
   static const LinearGradient cardGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF1E1B30), Color(0xFF1A1726)],
+    colors: [Color(0xFF202E3B), Color(0xFF1A2632)],
   );
 
   static const LinearGradient accentGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF6366F1), Color(0xFF818CF8)],
+    colors: [Color(0xFF07788C), Color(0xFF098FA6)],
   );
 
   static const LinearGradient heroGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF1E1040), Color(0xFF251A4A), Color(0xFF1A1726)],
+    colors: [Color(0xFF15222C), Color(0xFF192733), Color(0xFF111923)],
   );
+}
+
+/// Centralized theme controller managing active theme mode and notifications.
+class WisteriaThemeController {
+  WisteriaThemeController._();
+
+  static final ValueNotifier<ThemeMode> themeModeNotifier =
+      ValueNotifier<ThemeMode>(ThemeMode.dark);
+
+  static ThemeMode get currentThemeMode => themeModeNotifier.value;
+
+  static bool get isDark => themeModeNotifier.value == ThemeMode.dark;
+
+  static WisteriaColorPalette get currentPalette =>
+      isDark ? WisteriaColors.darkPalette : WisteriaColors.lightPalette;
+
+  static void setThemeMode(ThemeMode mode) {
+    if (themeModeNotifier.value != mode) {
+      themeModeNotifier.value = mode;
+    }
+  }
+
+  static void toggleTheme() {
+    setThemeMode(isDark ? ThemeMode.light : ThemeMode.dark);
+  }
 }
 
 class WisteriaSpacing {
@@ -125,104 +342,129 @@ class WisteriaElevation {
   ];
 }
 
-ThemeData buildWisteriaTheme() {
+/// Builds the centralized ThemeData for Dark or Light mode.
+ThemeData buildWisteriaTheme({Brightness brightness = Brightness.dark}) {
+  final palette = brightness == Brightness.dark
+      ? WisteriaColors.darkPalette
+      : WisteriaColors.lightPalette;
+  final isDark = brightness == Brightness.dark;
+
   return ThemeData(
     useMaterial3: true,
-    brightness: Brightness.dark,
+    brightness: brightness,
     fontFamily: 'Inter',
 
     // ── Color Scheme ──
-    colorScheme: const ColorScheme.dark(
-      surface: WisteriaColors.surface,
-      primary: WisteriaColors.primary,
-      primaryContainer: WisteriaColors.primaryContainer,
-      secondary: WisteriaColors.secondary,
-      tertiary: WisteriaColors.tertiary,
-      error: WisteriaColors.error,
-      onPrimary: WisteriaColors.textOnPrimary,
-      onSurface: WisteriaColors.textPrimary,
-      onSurfaceVariant: WisteriaColors.textSecondary,
-      outline: WisteriaColors.border,
-      outlineVariant: WisteriaColors.borderSubtle,
-      surfaceContainerLowest: WisteriaColors.surfaceLowest,
-      surfaceContainerLow: WisteriaColors.surfaceLow,
-      surfaceContainer: WisteriaColors.surfaceContainer,
-      surfaceContainerHigh: WisteriaColors.surfaceHigh,
-      surfaceContainerHighest: WisteriaColors.surfaceHighest,
-    ),
+    colorScheme: isDark
+        ? ColorScheme.dark(
+            surface: palette.surface,
+            primary: palette.primary,
+            primaryContainer: palette.primaryContainer,
+            secondary: palette.secondary,
+            tertiary: palette.tertiary,
+            error: palette.error,
+            onPrimary: palette.textOnPrimary,
+            onSurface: palette.textPrimary,
+            onSurfaceVariant: palette.textSecondary,
+            outline: palette.border,
+            outlineVariant: palette.borderSubtle,
+            surfaceContainerLowest: palette.surfaceLowest,
+            surfaceContainerLow: palette.surfaceLow,
+            surfaceContainer: palette.surfaceContainer,
+            surfaceContainerHigh: palette.surfaceHigh,
+            surfaceContainerHighest: palette.surfaceHighest,
+          )
+        : ColorScheme.light(
+            surface: palette.surface,
+            primary: palette.primary,
+            primaryContainer: palette.primaryContainer,
+            secondary: palette.secondary,
+            tertiary: palette.tertiary,
+            error: palette.error,
+            onPrimary: palette.textOnPrimary,
+            onSurface: palette.textPrimary,
+            onSurfaceVariant: palette.textSecondary,
+            outline: palette.border,
+            outlineVariant: palette.borderSubtle,
+            surfaceContainerLowest: palette.surfaceLowest,
+            surfaceContainerLow: palette.surfaceLow,
+            surfaceContainer: palette.surfaceContainer,
+            surfaceContainerHigh: palette.surfaceHigh,
+            surfaceContainerHighest: palette.surfaceHighest,
+          ),
 
-    scaffoldBackgroundColor: WisteriaColors.background,
+    scaffoldBackgroundColor: palette.background,
 
     // ── AppBar ──
-    appBarTheme: const AppBarTheme(
-      backgroundColor: WisteriaColors.background,
-      foregroundColor: WisteriaColors.textPrimary,
+    appBarTheme: AppBarTheme(
+      backgroundColor: palette.background,
+      foregroundColor: palette.textPrimary,
       elevation: 0,
       scrolledUnderElevation: 0,
       titleTextStyle: TextStyle(
         fontFamily: 'Inter',
         fontSize: 18,
         fontWeight: FontWeight.w600,
-        color: WisteriaColors.textPrimary,
+        color: palette.textPrimary,
         letterSpacing: -0.3,
       ),
     ),
 
-    // ── Card ──
+    // ── Card (BorderRadius = 0 for square corners) ──
     cardTheme: CardThemeData(
-      color: WisteriaColors.surfaceLow,
+      color: palette.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(WisteriaRadius.lg),
-        side: const BorderSide(color: WisteriaColors.border, width: 1),
+        borderRadius: BorderRadius.zero,
+        side: BorderSide(color: palette.border, width: 1),
       ),
       margin: EdgeInsets.zero,
     ),
 
     // ── Dialog ──
     dialogTheme: DialogThemeData(
-      backgroundColor: WisteriaColors.surfaceContainer,
+      backgroundColor: palette.surfaceContainer,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(WisteriaRadius.xl),
-        side: const BorderSide(color: WisteriaColors.border, width: 1),
+        side: BorderSide(color: palette.border, width: 1),
       ),
-      titleTextStyle: const TextStyle(
+      titleTextStyle: TextStyle(
         fontFamily: 'Inter',
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: WisteriaColors.textPrimary,
+        color: palette.textPrimary,
       ),
     ),
 
     // ── Input ──
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: WisteriaColors.surfaceLowest,
+      fillColor: palette.surfaceLowest,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(WisteriaRadius.md),
-        borderSide: const BorderSide(color: WisteriaColors.border),
+        borderSide: BorderSide(color: palette.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(WisteriaRadius.md),
-        borderSide: const BorderSide(color: WisteriaColors.border),
+        borderSide: BorderSide(color: palette.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(WisteriaRadius.md),
-        borderSide: const BorderSide(color: WisteriaColors.primary, width: 1.5),
+        borderSide: BorderSide(color: palette.primary, width: 1.5),
       ),
-      labelStyle: const TextStyle(
-        color: WisteriaColors.textSecondary,
+      labelStyle: TextStyle(
+        color: palette.textSecondary,
         fontSize: 14,
       ),
-      hintStyle: const TextStyle(color: WisteriaColors.textMuted, fontSize: 14),
+      hintStyle: TextStyle(color: palette.textMuted, fontSize: 14),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     ),
 
     // ── Buttons ──
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: WisteriaColors.primaryMuted,
-        foregroundColor: WisteriaColors.textOnPrimary,
+        backgroundColor: palette.primaryMuted,
+        foregroundColor: palette.textOnPrimary,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(WisteriaRadius.md),
@@ -237,7 +479,7 @@ ThemeData buildWisteriaTheme() {
 
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: WisteriaColors.primary,
+        foregroundColor: palette.primary,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(WisteriaRadius.md),
@@ -252,8 +494,8 @@ ThemeData buildWisteriaTheme() {
 
     // ── FAB ──
     floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: WisteriaColors.primaryMuted,
-      foregroundColor: WisteriaColors.textOnPrimary,
+      backgroundColor: palette.primaryMuted,
+      foregroundColor: palette.textOnPrimary,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(WisteriaRadius.lg),
@@ -262,10 +504,10 @@ ThemeData buildWisteriaTheme() {
 
     // ── SnackBar ──
     snackBarTheme: SnackBarThemeData(
-      backgroundColor: WisteriaColors.surfaceHigh,
-      contentTextStyle: const TextStyle(
+      backgroundColor: palette.surfaceHigh,
+      contentTextStyle: TextStyle(
         fontFamily: 'Inter',
-        color: WisteriaColors.textPrimary,
+        color: palette.textPrimary,
         fontSize: 14,
       ),
       shape: RoundedRectangleBorder(
@@ -275,8 +517,8 @@ ThemeData buildWisteriaTheme() {
     ),
 
     // ── Divider ──
-    dividerTheme: const DividerThemeData(
-      color: WisteriaColors.border,
+    dividerTheme: DividerThemeData(
+      color: palette.border,
       thickness: 1,
       space: 1,
     ),
@@ -290,89 +532,89 @@ ThemeData buildWisteriaTheme() {
     ),
 
     // ── Text ──
-    textTheme: const TextTheme(
+    textTheme: TextTheme(
       displayLarge: TextStyle(
         fontFamily: 'Inter',
         fontSize: 36,
         fontWeight: FontWeight.w700,
-        color: WisteriaColors.textPrimary,
+        color: palette.textPrimary,
         letterSpacing: -0.5,
       ),
       headlineLarge: TextStyle(
         fontFamily: 'Inter',
         fontSize: 28,
         fontWeight: FontWeight.w700,
-        color: WisteriaColors.textPrimary,
+        color: palette.textPrimary,
         letterSpacing: -0.3,
       ),
       headlineMedium: TextStyle(
         fontFamily: 'Inter',
         fontSize: 22,
         fontWeight: FontWeight.w600,
-        color: WisteriaColors.textPrimary,
+        color: palette.textPrimary,
         letterSpacing: -0.2,
       ),
       headlineSmall: TextStyle(
         fontFamily: 'Inter',
         fontSize: 18,
         fontWeight: FontWeight.w600,
-        color: WisteriaColors.textPrimary,
+        color: palette.textPrimary,
       ),
       titleLarge: TextStyle(
         fontFamily: 'Inter',
         fontSize: 18,
         fontWeight: FontWeight.w600,
-        color: WisteriaColors.textPrimary,
+        color: palette.textPrimary,
       ),
       titleMedium: TextStyle(
         fontFamily: 'Inter',
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: WisteriaColors.textPrimary,
+        color: palette.textPrimary,
       ),
       titleSmall: TextStyle(
         fontFamily: 'Inter',
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: WisteriaColors.textSecondary,
+        color: palette.textSecondary,
       ),
       bodyLarge: TextStyle(
         fontFamily: 'Inter',
         fontSize: 15,
         fontWeight: FontWeight.w400,
-        color: WisteriaColors.textPrimary,
+        color: palette.textPrimary,
       ),
       bodyMedium: TextStyle(
         fontFamily: 'Inter',
         fontSize: 13,
         fontWeight: FontWeight.w400,
-        color: WisteriaColors.textSecondary,
+        color: palette.textSecondary,
       ),
       bodySmall: TextStyle(
         fontFamily: 'Inter',
         fontSize: 12,
         fontWeight: FontWeight.w400,
-        color: WisteriaColors.textMuted,
+        color: palette.textMuted,
       ),
       labelLarge: TextStyle(
         fontFamily: 'Inter',
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: WisteriaColors.textPrimary,
+        color: palette.textPrimary,
         letterSpacing: 0.3,
       ),
       labelMedium: TextStyle(
         fontFamily: 'Inter',
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: WisteriaColors.textSecondary,
+        color: palette.textSecondary,
         letterSpacing: 0.5,
       ),
       labelSmall: TextStyle(
         fontFamily: 'Inter',
         fontSize: 11,
         fontWeight: FontWeight.w500,
-        color: WisteriaColors.textMuted,
+        color: palette.textMuted,
         letterSpacing: 0.5,
       ),
     ),

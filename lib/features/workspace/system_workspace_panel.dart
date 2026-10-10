@@ -28,7 +28,7 @@ class SystemWorkspacePanel extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── Header ──
-                  _buildHeader(),
+                  _buildHeader(context),
 
                   const SizedBox(height: 48),
 
@@ -43,16 +43,17 @@ class SystemWorkspacePanel extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final colors = WisteriaColors.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Doctor & System',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w700,
-            color: WisteriaColors.textPrimary,
+            color: colors.textPrimary,
             letterSpacing: -0.3,
           ),
         ),
@@ -62,7 +63,7 @@ class SystemWorkspacePanel extends StatelessWidget {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w400,
-            color: WisteriaColors.textSecondary.withValues(alpha: 0.8),
+            color: colors.textSecondary.withValues(alpha: 0.8),
           ),
         ),
       ],
@@ -71,34 +72,43 @@ class SystemWorkspacePanel extends StatelessWidget {
 
   Widget _buildGrid(BuildContext context, double maxWidth) {
     final isNarrow = maxWidth < 700;
+    final colors = WisteriaColors.of(context);
 
     final cards = [
       _SystemCard(
         title: 'Doctor Profile',
         subtitle: 'Manage your professional profile and clinic information',
         icon: Icons.person_rounded,
-        accentColor: WisteriaColors.tertiary,
+        accentColor: WisteriaColors.mutedRose,
+        tintColor: WisteriaColors.mutedRose,
+        imagePath: 'assets/images/doctor.png',
         onTap: () => _navigate(context, DoctorProfilePage(database: database)),
       ),
       _SystemCard(
         title: 'Settings',
         subtitle: 'Application preferences and configuration',
         icon: Icons.settings_rounded,
-        accentColor: WisteriaColors.primary,
+        accentColor: WisteriaColors.pink,
+        tintColor: WisteriaColors.pink,
+        imagePath: 'assets/images/settings.jpg',
         onTap: () => _navigate(context, SettingsPage(database: database)),
       ),
       _SystemCard(
         title: 'Models',
         subtitle: 'View preinstalled local AI models',
         icon: Icons.memory_rounded,
-        accentColor: const Color(0xFF38BDF8),
+        accentColor: colors.primary,
+        tintColor: colors.primary,
+        imagePath: 'assets/images/model.jpg',
         onTap: () => _navigate(context, MedicalModelPage(database: database)),
       ),
       _SystemCard(
         title: 'Sync',
         subtitle: 'Data synchronization across workstations',
         icon: Icons.sync_rounded,
-        accentColor: WisteriaColors.success,
+        accentColor: colors.secondary,
+        tintColor: colors.primary,
+        imagePath: 'assets/images/data sync.jpg',
         onTap: () => _navigate(
           context,
           const PlaceholderPage(
@@ -180,6 +190,8 @@ class _SystemCard extends StatefulWidget {
   final String subtitle;
   final IconData icon;
   final Color accentColor;
+  final Color? tintColor;
+  final String? imagePath;
   final VoidCallback onTap;
 
   const _SystemCard({
@@ -187,6 +199,8 @@ class _SystemCard extends StatefulWidget {
     required this.subtitle,
     required this.icon,
     required this.accentColor,
+    this.tintColor,
+    this.imagePath,
     required this.onTap,
   });
 
@@ -221,6 +235,11 @@ class _SystemCardState extends State<_SystemCard>
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isRose = widget.tintColor == WisteriaColors.mutedRose;
+    final isPink = widget.tintColor == WisteriaColors.pink;
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) {
@@ -237,52 +256,181 @@ class _SystemCardState extends State<_SystemCard>
           animation: _animation,
           builder: (context, child) {
             final t = _animation.value;
+            final hoverBorderColor = widget.accentColor.withValues(alpha: 0.65);
+            final borderColor = Color.lerp(
+              colors.border,
+              hoverBorderColor,
+              t,
+            )!;
+
             return Transform.translate(
-              offset: Offset(0, -2 * t),
+              offset: Offset(0, -1 * t),
               child: Container(
-                padding: const EdgeInsets.all(28),
                 decoration: BoxDecoration(
-                  gradient: WisteriaColors.cardGradient,
-                  borderRadius: BorderRadius.circular(WisteriaRadius.lg),
+                  borderRadius: BorderRadius.zero,
                   border: Border.all(
-                    color: _isHovered
-                        ? widget.accentColor.withValues(alpha: 0.45)
-                        : WisteriaColors.border,
+                    color: borderColor,
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      blurRadius: 8 + (14 * t),
-                      spreadRadius: -2,
-                      offset: Offset(0, 2 + (5 * t)),
-                      color: Colors.black.withValues(alpha: 0.20 + (0.08 * t)),
-                    ),
-                    if (_isHovered)
-                      BoxShadow(
-                        blurRadius: 20 + (8 * t),
-                        spreadRadius: -4,
-                        offset: Offset(0, 4 + (4 * t)),
-                        color: widget.accentColor.withValues(alpha: 0.08 * t),
+                      blurRadius: isDark ? (6 + (5 * t)) : (4 + (4 * t)),
+                      offset: Offset(0, isDark ? (2 + (2 * t)) : (1 + (2 * t))),
+                      color: Colors.black.withValues(
+                        alpha: isDark ? (0.22 + 0.08 * t) : (0.04 + 0.04 * t),
                       ),
+                    ),
                   ],
                 ),
-                child: child,
+                child: ClipRect(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Base surface fallback
+                      Container(
+                        color: isDark
+                            ? (isRose
+                                ? const Color(0xFF1C151A)
+                                : (isPink
+                                    ? const Color(0xFF1B161B)
+                                    : colors.surface))
+                            : colors.surface,
+                      ),
+                      // Background photo
+                      if (widget.imagePath != null)
+                        Positioned.fill(
+                          child: Image.asset(
+                            widget.imagePath!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const SizedBox.shrink(),
+                          ),
+                        ),
+                      // Subtle rose, neutral-pink, or blue/teal tinted gradient overlay
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              stops: const [0.0, 0.40, 0.70, 1.0],
+                              colors: isDark
+                                  ? (isRose
+                                      ? [
+                                          const Color(0xFFAF6A6A).withValues(
+                                            alpha: 0.09,
+                                          ),
+                                          const Color(0xFF241A1E).withValues(
+                                            alpha: 0.30,
+                                          ),
+                                          const Color(0xFF1E151A).withValues(
+                                            alpha: 0.58,
+                                          ),
+                                          const Color(0xFF16141A).withValues(
+                                            alpha: 0.82,
+                                          ),
+                                        ]
+                                      : (isPink
+                                          ? [
+                                              const Color(0xFFC998A2).withValues(
+                                                alpha: 0.07,
+                                              ),
+                                              const Color(0xFF201A20).withValues(
+                                                alpha: 0.28,
+                                              ),
+                                              const Color(0xFF1B161B).withValues(
+                                                alpha: 0.55,
+                                              ),
+                                              const Color(0xFF151419).withValues(
+                                                alpha: 0.82,
+                                              ),
+                                            ]
+                                          : [
+                                              const Color(0xFF098FA6).withValues(
+                                                alpha: 0.08,
+                                              ),
+                                              const Color(0xFF11222D).withValues(
+                                                alpha: 0.28,
+                                              ),
+                                              const Color(0xFF13222E).withValues(
+                                                alpha: 0.55,
+                                              ),
+                                              const Color(0xFF111923).withValues(
+                                                alpha: 0.80,
+                                              ),
+                                            ]))
+                                  : (isRose
+                                      ? [
+                                          const Color(0xFFAF6A6A).withValues(
+                                            alpha: 0.06,
+                                          ),
+                                          const Color(0xFFF6ECEC).withValues(
+                                            alpha: 0.18,
+                                          ),
+                                          const Color(0xFFFAF1F1).withValues(
+                                            alpha: 0.52,
+                                          ),
+                                          const Color(0xFFFFFFFF).withValues(
+                                            alpha: 0.85,
+                                          ),
+                                        ]
+                                      : (isPink
+                                          ? [
+                                              const Color(0xFFC998A2).withValues(
+                                                alpha: 0.04,
+                                              ),
+                                              const Color(0xFFF7F0F1).withValues(
+                                                alpha: 0.16,
+                                              ),
+                                              const Color(0xFFFAF4F5).withValues(
+                                                alpha: 0.50,
+                                              ),
+                                              const Color(0xFFFFFFFF).withValues(
+                                                alpha: 0.85,
+                                              ),
+                                            ]
+                                          : [
+                                              const Color(0xFF098FA6).withValues(
+                                                alpha: 0.04,
+                                              ),
+                                              const Color(0xFFE4F0F3).withValues(
+                                                alpha: 0.18,
+                                              ),
+                                              const Color(0xFFEAF4F6).withValues(
+                                                alpha: 0.52,
+                                              ),
+                                              const Color(0xFFFFFFFF).withValues(
+                                                alpha: 0.85,
+                                              ),
+                                            ])),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Foreground card content with exact existing layout
+                      Padding(
+                        padding: const EdgeInsets.all(28),
+                        child: child,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             );
           },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildIcon(),
+              _buildIcon(isDark),
 
               const Spacer(),
 
               Text(
                 widget.title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: WisteriaColors.textPrimary,
+                  color: colors.textPrimary,
                   letterSpacing: 0.1,
                 ),
               ),
@@ -291,10 +439,10 @@ class _SystemCardState extends State<_SystemCard>
 
               Text(
                 widget.subtitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w400,
-                  color: WisteriaColors.textMuted,
+                  color: colors.textSecondary,
                   height: 1.4,
                 ),
                 maxLines: 2,
@@ -307,28 +455,34 @@ class _SystemCardState extends State<_SystemCard>
     );
   }
 
-  Widget _buildIcon() {
+  Widget _buildIcon(bool isDark) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       width: 52,
       height: 52,
       decoration: BoxDecoration(
-        color: _isHovered
-            ? widget.accentColor.withValues(alpha: 0.16)
-            : widget.accentColor.withValues(alpha: 0.10),
+        color: isDark
+            ? const Color(0xFF192831).withValues(alpha: _isHovered ? 0.90 : 0.80)
+            : Colors.white.withValues(alpha: _isHovered ? 0.95 : 0.88),
         borderRadius: BorderRadius.circular(WisteriaRadius.md),
         border: Border.all(
           color: _isHovered
-              ? widget.accentColor.withValues(alpha: 0.25)
-              : Colors.transparent,
+              ? widget.accentColor.withValues(alpha: 0.50)
+              : widget.accentColor.withValues(alpha: 0.25),
+          width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.05),
+          ),
+        ],
       ),
       child: Icon(
         widget.icon,
         size: 24,
-        color: _isHovered
-            ? widget.accentColor
-            : widget.accentColor.withValues(alpha: 0.8),
+        color: widget.accentColor,
       ),
     );
   }

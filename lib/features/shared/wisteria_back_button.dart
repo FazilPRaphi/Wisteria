@@ -19,6 +19,7 @@ class _WisteriaBackButtonState extends State<WisteriaBackButton> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _isHovered = true),
@@ -30,13 +31,13 @@ class _WisteriaBackButtonState extends State<WisteriaBackButton> {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
             color: _isHovered
-                ? WisteriaColors.primary.withValues(alpha: 0.10)
+                ? colors.primary.withValues(alpha: 0.10)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(WisteriaRadius.md),
             border: Border.all(
               color: _isHovered
-                  ? WisteriaColors.primary.withValues(alpha: 0.2)
-                  : WisteriaColors.border.withValues(alpha: 0.5),
+                  ? colors.primary.withValues(alpha: 0.3)
+                  : colors.border.withValues(alpha: 0.5),
             ),
           ),
           child: Row(
@@ -46,8 +47,8 @@ class _WisteriaBackButtonState extends State<WisteriaBackButton> {
                 Icons.arrow_back_rounded,
                 size: 18,
                 color: _isHovered
-                    ? WisteriaColors.primary
-                    : WisteriaColors.textSecondary,
+                    ? colors.primary
+                    : colors.textSecondary,
               ),
               const SizedBox(width: 8),
               Text(
@@ -56,8 +57,8 @@ class _WisteriaBackButtonState extends State<WisteriaBackButton> {
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                   color: _isHovered
-                      ? WisteriaColors.primary
-                      : WisteriaColors.textSecondary,
+                      ? colors.primary
+                      : colors.textSecondary,
                 ),
               ),
             ],

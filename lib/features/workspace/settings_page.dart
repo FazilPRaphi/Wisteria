@@ -17,8 +17,10 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
+
     return Scaffold(
-      backgroundColor: WisteriaColors.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -27,14 +29,14 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Row(
                 children: [
-                  const WisteriaBackButton(),
+                  WisteriaBackButton(),
                   const Spacer(),
-                  const Text(
+                  Text(
                     'Settings',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: WisteriaColors.textMuted,
+                      color: colors.textMuted,
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -62,26 +64,26 @@ class _SettingsPageState extends State<SettingsPage> {
                               width: 48,
                               height: 48,
                               decoration: BoxDecoration(
-                                color: WisteriaColors.primary.withValues(
+                                color: colors.primary.withValues(
                                   alpha: 0.10,
                                 ),
                                 borderRadius: BorderRadius.circular(
                                   WisteriaRadius.md,
                                 ),
                                 border: Border.all(
-                                  color: WisteriaColors.primary.withValues(
+                                  color: colors.primary.withValues(
                                     alpha: 0.15,
                                   ),
                                 ),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.settings_rounded,
-                                color: WisteriaColors.primary,
+                                color: colors.primary,
                                 size: 22,
                               ),
                             ),
                             const SizedBox(width: 16),
-                            const Column(
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
@@ -89,16 +91,16 @@ class _SettingsPageState extends State<SettingsPage> {
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.w700,
-                                    color: WisteriaColors.textPrimary,
+                                    color: colors.textPrimary,
                                     letterSpacing: -0.2,
                                   ),
                                 ),
-                                SizedBox(height: 2),
+                                const SizedBox(height: 2),
                                 Text(
                                   'Application preferences',
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: WisteriaColors.textMuted,
+                                    color: colors.textMuted,
                                   ),
                                 ),
                               ],
@@ -110,35 +112,15 @@ class _SettingsPageState extends State<SettingsPage> {
 
                         // ── Appearance ──
                         _buildSection(
+                          colors: colors,
                           title: 'Appearance',
                           icon: Icons.palette_outlined,
                           children: [
                             _buildSettingRow(
+                              colors: colors,
                               label: 'Theme',
                               description: 'Application visual theme',
-                              trailing: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: WisteriaColors.surfaceContainer,
-                                  borderRadius: BorderRadius.circular(
-                                    WisteriaRadius.sm,
-                                  ),
-                                  border: Border.all(
-                                    color: WisteriaColors.border,
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Dark',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: WisteriaColors.textPrimary,
-                                  ),
-                                ),
-                              ),
+                              trailing: const _ThemeSwitcher(),
                             ),
                           ],
                         ),
@@ -147,51 +129,55 @@ class _SettingsPageState extends State<SettingsPage> {
 
                         // ── Application ──
                         _buildSection(
+                          colors: colors,
                           title: 'Application',
                           icon: Icons.computer_rounded,
                           children: [
                             _buildSettingRow(
+                              colors: colors,
                               label: 'Version',
                               description: 'Wisteria Clinical AI Workstation',
-                              trailing: const Text(
+                              trailing: Text(
                                 '1.0.0',
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
-                                  color: WisteriaColors.textSecondary,
+                                  color: colors.textSecondary,
                                   fontFamily: 'monospace',
                                 ),
                               ),
                             ),
-                            const Divider(
-                              color: WisteriaColors.border,
+                            Divider(
+                              color: colors.border,
                               height: 32,
                             ),
                             _buildSettingRow(
+                              colors: colors,
                               label: 'Runtime',
                               description: 'AI inference engine',
-                              trailing: const Text(
+                              trailing: Text(
                                 'ONNX Runtime',
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
-                                  color: WisteriaColors.textSecondary,
+                                  color: colors.textSecondary,
                                 ),
                               ),
                             ),
-                            const Divider(
-                              color: WisteriaColors.border,
+                            Divider(
+                              color: colors.border,
                               height: 32,
                             ),
                             _buildSettingRow(
+                              colors: colors,
                               label: 'Storage',
                               description: 'Local database engine',
-                              trailing: const Text(
+                              trailing: Text(
                                 'SQLite (Drift)',
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
-                                  color: WisteriaColors.textSecondary,
+                                  color: colors.textSecondary,
                                 ),
                               ),
                             ),
@@ -212,15 +198,16 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildSection({
+    required WisteriaColorPalette colors,
     required String title,
     required IconData icon,
     required List<Widget> children,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: WisteriaColors.surfaceLow,
-        borderRadius: BorderRadius.circular(WisteriaRadius.lg),
-        border: Border.all(color: WisteriaColors.border),
+        color: colors.surfaceLow,
+        borderRadius: BorderRadius.zero,
+        border: Border.all(color: colors.border),
       ),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -232,15 +219,15 @@ class _SettingsPageState extends State<SettingsPage> {
                 Icon(
                   icon,
                   size: 20,
-                  color: WisteriaColors.primary.withValues(alpha: 0.7),
+                  color: colors.primary.withValues(alpha: 0.7),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: WisteriaColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
               ],
@@ -254,6 +241,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildSettingRow({
+    required WisteriaColorPalette colors,
     required String label,
     required String description,
     required Widget trailing,
@@ -266,18 +254,18 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: WisteriaColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
               const SizedBox(height: 3),
               Text(
                 description,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: WisteriaColors.textMuted,
+                  color: colors.textMuted,
                 ),
               ),
             ],
@@ -285,6 +273,111 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         trailing,
       ],
+    );
+  }
+}
+
+/// Interactive Dark / Light mode switcher with square corners.
+class _ThemeSwitcher extends StatelessWidget {
+  const _ThemeSwitcher();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
+
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: WisteriaThemeController.themeModeNotifier,
+      builder: (context, currentMode, _) {
+        final isDark = currentMode == ThemeMode.dark;
+
+        return Container(
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: colors.surfaceContainer,
+            borderRadius: BorderRadius.zero,
+            border: Border.all(color: colors.border),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _ThemeOption(
+                label: 'Dark',
+                icon: Icons.dark_mode_rounded,
+                isSelected: isDark,
+                onTap: () =>
+                    WisteriaThemeController.setThemeMode(ThemeMode.dark),
+              ),
+              const SizedBox(width: 4),
+              _ThemeOption(
+                label: 'Light',
+                icon: Icons.light_mode_rounded,
+                isSelected: !isDark,
+                onTap: () =>
+                    WisteriaThemeController.setThemeMode(ThemeMode.light),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ThemeOption extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ThemeOption({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? colors.primaryMuted.withValues(alpha: 0.9)
+                : Colors.transparent,
+            borderRadius: BorderRadius.zero,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: isSelected
+                    ? colors.textOnPrimary
+                    : colors.textSecondary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected
+                      ? colors.textOnPrimary
+                      : colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

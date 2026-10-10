@@ -374,10 +374,12 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
+
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: WisteriaColors.background,
-        body: Center(
+      return Scaffold(
+        backgroundColor: colors.background,
+        body: const Center(
           child: CircularProgressIndicator(color: WisteriaColors.primary),
         ),
       );
@@ -387,7 +389,7 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
 
     if (examination == null) {
       return Scaffold(
-        backgroundColor: WisteriaColors.background,
+        backgroundColor: colors.background,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -414,7 +416,7 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
     }
 
     return Scaffold(
-      backgroundColor: WisteriaColors.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [

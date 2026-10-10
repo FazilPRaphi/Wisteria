@@ -19,10 +19,11 @@ class PlaceholderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = accentColor ?? WisteriaColors.primary;
+    final colors = WisteriaColors.of(context);
+    final accent = accentColor ?? colors.primary;
 
     return Scaffold(
-      backgroundColor: WisteriaColors.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -62,10 +63,10 @@ class PlaceholderPage extends StatelessWidget {
                       // Title
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
-                          color: WisteriaColors.textPrimary,
+                          color: colors.textPrimary,
                           letterSpacing: -0.3,
                         ),
                       ),
@@ -75,10 +76,10 @@ class PlaceholderPage extends StatelessWidget {
                       // Subtitle
                       Text(
                         subtitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
-                          color: WisteriaColors.textSecondary,
+                          color: colors.textSecondary,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -92,11 +93,11 @@ class PlaceholderPage extends StatelessWidget {
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: WisteriaColors.surfaceLow,
+                          color: colors.surfaceLow,
                           borderRadius: BorderRadius.circular(
                             WisteriaRadius.full,
                           ),
-                          border: Border.all(color: WisteriaColors.border),
+                          border: Border.all(color: colors.border),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -104,17 +105,17 @@ class PlaceholderPage extends StatelessWidget {
                             Icon(
                               Icons.construction_rounded,
                               size: 16,
-                              color: WisteriaColors.warning.withValues(
+                              color: colors.warning.withValues(
                                 alpha: 0.7,
                               ),
                             ),
                             const SizedBox(width: 8),
-                            const Text(
+                            Text(
                               'Coming in the next stage',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
-                                color: WisteriaColors.textMuted,
+                                color: colors.textMuted,
                               ),
                             ),
                           ],
@@ -159,6 +160,8 @@ class _BackButtonState extends State<_BackButton> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _isHovered = true),
@@ -170,13 +173,13 @@ class _BackButtonState extends State<_BackButton> {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
             color: _isHovered
-                ? WisteriaColors.primary.withValues(alpha: 0.10)
+                ? colors.primary.withValues(alpha: 0.10)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(WisteriaRadius.md),
             border: Border.all(
               color: _isHovered
-                  ? WisteriaColors.primary.withValues(alpha: 0.2)
-                  : WisteriaColors.border.withValues(alpha: 0.5),
+                  ? colors.primary.withValues(alpha: 0.3)
+                  : colors.border.withValues(alpha: 0.5),
             ),
           ),
           child: Row(
@@ -186,8 +189,8 @@ class _BackButtonState extends State<_BackButton> {
                 Icons.arrow_back_rounded,
                 size: 18,
                 color: _isHovered
-                    ? WisteriaColors.primary
-                    : WisteriaColors.textSecondary,
+                    ? colors.primary
+                    : colors.textSecondary,
               ),
               const SizedBox(width: 8),
               Text(
@@ -196,8 +199,8 @@ class _BackButtonState extends State<_BackButton> {
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                   color: _isHovered
-                      ? WisteriaColors.primary
-                      : WisteriaColors.textSecondary,
+                      ? colors.primary
+                      : colors.textSecondary,
                 ),
               ),
             ],

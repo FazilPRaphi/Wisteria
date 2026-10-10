@@ -17,13 +17,18 @@ class WisteriaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Wisteria — Clinical AI Workstation',
-
-      theme: buildWisteriaTheme(),
-
-      home: WisteriaAppShell(database: database),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: WisteriaThemeController.themeModeNotifier,
+      builder: (context, themeMode, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Wisteria — Clinical AI Workstation',
+          theme: buildWisteriaTheme(brightness: Brightness.light),
+          darkTheme: buildWisteriaTheme(brightness: Brightness.dark),
+          themeMode: themeMode,
+          home: WisteriaAppShell(database: database),
+        );
+      },
     );
   }
 }

@@ -7,8 +7,15 @@ import '../shared/wisteria_back_button.dart';
 
 class PatientPage extends StatefulWidget {
   final WisteriaDatabase database;
+  final bool initialShowRegistry;
+  final bool autoOpenAddPatient;
 
-  const PatientPage({super.key, required this.database});
+  const PatientPage({
+    super.key,
+    required this.database,
+    this.initialShowRegistry = false,
+    this.autoOpenAddPatient = false,
+  });
 
   @override
   State<PatientPage> createState() => _PatientPageState();
@@ -30,9 +37,18 @@ class _PatientPageState extends State<PatientPage> {
   @override
   void initState() {
     super.initState();
+    _showRegistry = widget.initialShowRegistry || widget.autoOpenAddPatient;
     _patientRepository = PatientRepository(widget.database);
     _searchController.addListener(_onSearchChanged);
     _loadPatients();
+
+    if (widget.autoOpenAddPatient) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _showAddPatientDialog();
+        }
+      });
+    }
   }
 
   void _onSearchChanged() {
@@ -134,7 +150,7 @@ class _PatientPageState extends State<PatientPage> {
                   children: [
                     TextFormField(
                       controller: nameController,
-                      style: const TextStyle(color: WisteriaColors.textPrimary),
+                      style: TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(
                         labelText: 'Patient Name',
                       ),
@@ -148,7 +164,7 @@ class _PatientPageState extends State<PatientPage> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: phoneController,
-                      style: const TextStyle(color: WisteriaColors.textPrimary),
+                      style: TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(
                         labelText: 'Phone Number',
                       ),
@@ -157,13 +173,13 @@ class _PatientPageState extends State<PatientPage> {
                     TextFormField(
                       controller: ageController,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(color: WisteriaColors.textPrimary),
+                      style: TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(labelText: 'Age'),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: bloodGroupController,
-                      style: const TextStyle(color: WisteriaColors.textPrimary),
+                      style: TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(
                         labelText: 'Blood Group',
                       ),
@@ -171,7 +187,7 @@ class _PatientPageState extends State<PatientPage> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: otherContactController,
-                      style: const TextStyle(color: WisteriaColors.textPrimary),
+                      style: TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(
                         labelText: 'Other Contact',
                       ),
@@ -180,7 +196,7 @@ class _PatientPageState extends State<PatientPage> {
                     TextFormField(
                       controller: addressController,
                       maxLines: 3,
-                      style: const TextStyle(color: WisteriaColors.textPrimary),
+                      style: TextStyle(color: WisteriaColors.textPrimary),
                       decoration: const InputDecoration(
                         labelText: 'Contact Address',
                         alignLabelWithHint: true,
@@ -251,8 +267,9 @@ class _PatientPageState extends State<PatientPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
     return Scaffold(
-      backgroundColor: WisteriaColors.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -262,9 +279,15 @@ class _PatientPageState extends State<PatientPage> {
               child: Row(
                 children: [
                   WisteriaBackButton(
-                    label: _showRegistry ? 'Patients' : 'Workspace',
+                    label: _showRegistry &&
+                            !widget.initialShowRegistry &&
+                            !widget.autoOpenAddPatient
+                        ? 'Patients'
+                        : 'Workspace',
                     onTap: () {
-                      if (_showRegistry) {
+                      if (_showRegistry &&
+                          !widget.initialShowRegistry &&
+                          !widget.autoOpenAddPatient) {
                         setState(() => _showRegistry = false);
                       } else {
                         Navigator.of(context).pop();
@@ -275,7 +298,7 @@ class _PatientPageState extends State<PatientPage> {
                   if (_showRegistry)
                     Text(
                       '${_patients.length} patient${_patients.length == 1 ? '' : 's'}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         color: WisteriaColors.textMuted,
@@ -324,14 +347,14 @@ class _PatientPageState extends State<PatientPage> {
                         color: WisteriaColors.primary.withValues(alpha: 0.15),
                       ),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.people_rounded,
                       color: WisteriaColors.primary,
                       size: 22,
                     ),
                   ),
                   const SizedBox(width: 16),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -343,7 +366,7 @@ class _PatientPageState extends State<PatientPage> {
                           letterSpacing: -0.2,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
                         'Patient registration and records',
                         style: TextStyle(
@@ -448,14 +471,14 @@ class _PatientPageState extends State<PatientPage> {
                           color: WisteriaColors.primary.withValues(alpha: 0.15),
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.folder_shared_rounded,
                         color: WisteriaColors.primary,
                         size: 22,
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -467,7 +490,7 @@ class _PatientPageState extends State<PatientPage> {
                             letterSpacing: -0.2,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           'Search and manage patient records',
                           style: TextStyle(
@@ -490,13 +513,13 @@ class _PatientPageState extends State<PatientPage> {
                     Expanded(
                       child: TextField(
                         controller: _searchController,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: WisteriaColors.textPrimary,
                           fontSize: 14,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Search by name, ID, or phone number...',
-                          prefixIcon: const Icon(
+                          prefixIcon: Icon(
                             Icons.search_rounded,
                             color: WisteriaColors.textMuted,
                             size: 20,
@@ -504,7 +527,7 @@ class _PatientPageState extends State<PatientPage> {
                           suffixIcon: _searchController.text.isNotEmpty
                               ? IconButton(
                                   onPressed: () => _searchController.clear(),
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.clear_rounded,
                                     size: 18,
                                     color: WisteriaColors.textMuted,
@@ -526,8 +549,8 @@ class _PatientPageState extends State<PatientPage> {
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: _bloodGroupFilter,
-                          hint: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
+                          hint: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Text(
                               'Blood Group',
                               style: TextStyle(
@@ -536,7 +559,7 @@ class _PatientPageState extends State<PatientPage> {
                               ),
                             ),
                           ),
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.arrow_drop_down,
                             color: WisteriaColors.textMuted,
                           ),
@@ -577,7 +600,7 @@ class _PatientPageState extends State<PatientPage> {
           // ── Patient grid ──
           Expanded(
             child: _isLoading
-                ? const Center(
+                ? Center(
                     child: CircularProgressIndicator(
                       color: WisteriaColors.primary,
                     ),
@@ -602,7 +625,7 @@ class _PatientPageState extends State<PatientPage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
+          Icon(
             Icons.error_outline_rounded,
             size: 48,
             color: WisteriaColors.error,
@@ -610,7 +633,7 @@ class _PatientPageState extends State<PatientPage> {
           const SizedBox(height: 16),
           Text(
             _error ?? 'An error occurred',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               color: WisteriaColors.textSecondary,
             ),
@@ -651,14 +674,14 @@ class _PatientPageState extends State<PatientPage> {
           const SizedBox(height: 20),
           Text(
             message,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
               color: WisteriaColors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Add your first patient to get started.',
             style: TextStyle(fontSize: 13, color: WisteriaColors.textMuted),
           ),
@@ -808,7 +831,7 @@ class _PatientCardState extends State<_PatientCard> {
                     child: Center(
                       child: Text(
                         initials,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: WisteriaColors.primary,
@@ -832,7 +855,7 @@ class _PatientCardState extends State<_PatientCard> {
               // ── Name ──
               Text(
                 patient.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                   color: WisteriaColors.textPrimary,
@@ -846,7 +869,7 @@ class _PatientCardState extends State<_PatientCard> {
               // ── ID ──
               Text(
                 patient.id,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   color: WisteriaColors.textMuted,
                   fontFamily: 'monospace',
@@ -863,7 +886,7 @@ class _PatientCardState extends State<_PatientCard> {
                   if (patient.age != null) 'Age ${patient.age}',
                   if (patient.bloodGroup != null) patient.bloodGroup!,
                 ].join(' · '),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   color: WisteriaColors.textSecondary,
                 ),
@@ -954,7 +977,7 @@ class _LandingCardState extends State<_LandingCard>
                       WisteriaColors.surfaceLow,
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(WisteriaRadius.xl),
+                  borderRadius: BorderRadius.zero,
                   border: Border.all(
                     color: _isHovered
                         ? widget.accentColor.withValues(alpha: 0.45)
@@ -1010,7 +1033,7 @@ class _LandingCardState extends State<_LandingCard>
               const Spacer(),
               Text(
                 widget.title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   color: WisteriaColors.textPrimary,
@@ -1020,7 +1043,7 @@ class _LandingCardState extends State<_LandingCard>
               const SizedBox(height: 8),
               Text(
                 widget.subtitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   color: WisteriaColors.textSecondary,
                   height: 1.4,
@@ -1088,7 +1111,7 @@ class _AddPatientButtonState extends State<_AddPatientButton> {
                 ? WisteriaElevation.accentGlow(WisteriaColors.primary)
                 : [],
           ),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
@@ -1096,7 +1119,7 @@ class _AddPatientButtonState extends State<_AddPatientButton> {
                 size: 16,
                 color: WisteriaColors.textOnPrimary,
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 'New Patient',
                 style: TextStyle(

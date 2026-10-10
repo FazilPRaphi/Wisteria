@@ -233,11 +233,12 @@ class _MedicalModelPageState extends State<MedicalModelPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
     return Scaffold(
-      backgroundColor: WisteriaColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Medical Model Management'),
-        backgroundColor: WisteriaColors.background,
+        backgroundColor: colors.background,
         actions: [
           IconButton(
             tooltip: 'Refresh models',
