@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 
 import '../../core/database/database.dart';
 import '../../core/database/repositories/doctor_repository.dart';
 import '../../core/storage/doctor_document_storage.dart';
 import '../../core/theme/wisteria_theme.dart';
 import '../shared/wisteria_back_button.dart';
+import 'doctor_document_viewer_page.dart';
 
 class DoctorProfilePage extends StatefulWidget {
   final WisteriaDatabase database;
@@ -41,10 +45,8 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
   @override
   void initState() {
     super.initState();
-
     _doctorRepository = DoctorRepository(widget.database);
     _documentStorage = DoctorDocumentStorage();
-
     _loadProfile();
   }
 
@@ -55,21 +57,13 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
     if (profile != null) {
       _doctorNameController.text = profile.doctorName;
-
       _specializationController.text = profile.specialization ?? '';
-
       _clinicNameController.text = profile.clinicName ?? '';
-
       _clinicAddressController.text = profile.clinicAddress ?? '';
-
       _clinicPhoneController.text = profile.clinicPhoneNumber ?? '';
-
       _emailController.text = profile.email ?? '';
-
       _signatureController.text = profile.signature ?? '';
-
       _documentPath = profile.documentPath;
-
       _documentFileName = profile.documentFileName;
     }
 
@@ -108,9 +102,17 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
         _isSaving = false;
       });
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Doctor profile saved')));
+      final colors = WisteriaColors.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Doctor profile saved successfully'),
+          backgroundColor: colors.primaryMuted,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+          ),
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
 
@@ -119,7 +121,10 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save doctor profile: $e')),
+        SnackBar(
+          content: Text('Failed to save doctor profile: $e'),
+          backgroundColor: WisteriaColors.error,
+        ),
       );
     }
   }
@@ -147,12 +152,17 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
         _documentPath = savedPath;
         _documentFileName = selectedFile.name;
       });
+
+      await _saveDocumentPathToProfile(savedPath, selectedFile.name);
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to add document: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to add document: $e'),
+          backgroundColor: WisteriaColors.error,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -162,15 +172,56 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     }
   }
 
+  Future<void> _saveDocumentPathToProfile(String path, String name) async {
+    try {
+      await _doctorRepository.saveProfile(
+        id: 'local-doctor',
+        doctorName: _doctorNameController.text.trim().isNotEmpty
+            ? _doctorNameController.text.trim()
+            : 'Doctor',
+        specialization: _optionalValue(_specializationController),
+        clinicName: _optionalValue(_clinicNameController),
+        clinicAddress: _optionalValue(_clinicAddressController),
+        clinicPhoneNumber: _optionalValue(_clinicPhoneController),
+        email: _optionalValue(_emailController),
+        signature: _optionalValue(_signatureController),
+        documentPath: path,
+        documentFileName: name,
+      );
+    } catch (_) {}
+  }
+
+  Future<void> _openDocument() async {
+    if (_documentPath == null || _documentPath!.isEmpty) return;
+
+    final file = File(_documentPath!);
+    if (!await file.exists()) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Document file not found on disk.')),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => DoctorDocumentViewerPage(
+          documentPath: _documentPath!,
+          documentName: _documentFileName ?? 'Doctor Document',
+        ),
+      ),
+    );
+  }
+
   String? _optionalValue(TextEditingController controller) {
     final value = controller.text.trim();
-
     return value.isEmpty ? null : value;
   }
 
   void _cancelEditing() {
     _loadProfile();
-
     setState(() {
       _isEditing = false;
     });
@@ -185,40 +236,44 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     _clinicPhoneController.dispose();
     _emailController.dispose();
     _signatureController.dispose();
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
+
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: const Center(
-          child: CircularProgressIndicator(color: WisteriaColors.primary),
-        ),
+        backgroundColor: colors.background,
+        body: Center(child: CircularProgressIndicator(color: colors.primary)),
       );
     }
-
-    final colors = WisteriaColors.of(context);
 
     return Scaffold(
       backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
+            // Top Navigation Bar
+            Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: colors.border)),
+              ),
               child: Row(
                 children: [
-                  const WisteriaBackButton(),
+                  WisteriaBackButton(
+                    label: 'Dashboard',
+                    onTap: () => Navigator.of(context).pop(),
+                  ),
                   const Spacer(),
-                  const Text(
-                    'Doctor Profile',
+                  Text(
+                    '',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: WisteriaColors.textMuted,
+                      color: colors.textMuted,
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -230,11 +285,11 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
-                  vertical: 8,
+                  vertical: 24,
                 ),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 700),
+                    constraints: const BoxConstraints(maxWidth: 960),
                     child: _isEditing
                         ? _buildEditProfile()
                         : _buildProfileView(),
@@ -254,72 +309,265 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
       children: [
         _buildHeader(),
 
-        const SizedBox(height: 32),
+        const SizedBox(height: 28),
 
-        _buildProfileCard(),
+        // Responsive Two-Column Layout for Desktop
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= 640;
+            if (isWide) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: _buildDoctorInfoCard()),
+                  const SizedBox(width: 20),
+                  Expanded(child: _buildClinicInfoCard()),
+                ],
+              );
+            } else {
+              return Column(
+                children: [
+                  _buildDoctorInfoCard(),
+                  const SizedBox(height: 20),
+                  _buildClinicInfoCard(),
+                ],
+              );
+            }
+          },
+        ),
 
         const SizedBox(height: 20),
 
+        // Compact PDF Document Panel
         _buildDocumentCard(),
 
-        const SizedBox(height: 32),
-
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: () {
-              setState(() {
-                _isEditing = true;
-              });
-            },
-            icon: const Icon(Icons.edit_outlined),
-            label: const Text('Edit Profile'),
-          ),
-        ),
-
-        const SizedBox(height: 48),
+        const SizedBox(height: 40),
       ],
     );
   }
 
   Widget _buildHeader() {
+    final colors = WisteriaColors.of(context);
+
     return Row(
       children: [
         Container(
           width: 52,
           height: 52,
           decoration: BoxDecoration(
-            color: WisteriaColors.tertiary.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(WisteriaRadius.lg),
-            border: Border.all(
-              color: WisteriaColors.tertiary.withValues(alpha: 0.15),
-            ),
+            color: colors.primary.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+            border: Border.all(color: colors.primary.withValues(alpha: 0.18)),
           ),
-          child: const Icon(
-            Icons.person_rounded,
-            color: WisteriaColors.tertiary,
-            size: 24,
+          child: Icon(
+            Icons.medical_information_rounded,
+            color: colors.primary,
+            size: 26,
           ),
         ),
 
         const SizedBox(width: 18),
 
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Doctor Profile',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: WisteriaColors.textPrimary,
-                letterSpacing: -0.2,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Doctor Profile',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: colors.textPrimary,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Manage your professional information, clinic details, and credentials.',
+                style: TextStyle(fontSize: 14, color: colors.textSecondary),
+              ),
+            ],
+          ),
+        ),
+
+        if (!_isEditing)
+          ElevatedButton.icon(
+            onPressed: () {
+              setState(() {
+                _isEditing = true;
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.primaryMuted,
+              foregroundColor: colors.textOnPrimary,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(WisteriaRadius.sm),
               ),
             ),
-            SizedBox(height: 4),
-            Text(
-              'Doctor information and documents',
-              style: TextStyle(fontSize: 13, color: WisteriaColors.textMuted),
+            icon: const Icon(Icons.edit_outlined, size: 16),
+            label: const Text(
+              'Edit Profile',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDoctorInfoCard() {
+    final colors = WisteriaColors.of(context);
+    final name = _doctorNameController.text.trim();
+    final spec = _specializationController.text.trim();
+    final email = _emailController.text.trim();
+    final hasName = name.isNotEmpty;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: colors.surfaceLow,
+        borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+        border: Border.all(color: colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader('Doctor Information', Icons.badge_outlined),
+          const SizedBox(height: 20),
+
+          Text(
+            'Doctor Name',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: colors.textMuted,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            hasName ? 'Dr. $name' : 'Not configured',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: hasName ? colors.textPrimary : colors.textMuted,
+              letterSpacing: -0.2,
+            ),
+          ),
+
+          const SizedBox(height: 18),
+          Divider(color: colors.borderSubtle, height: 1),
+          const SizedBox(height: 18),
+
+          _buildProfileFieldRow(
+            'Specialization',
+            spec.isNotEmpty ? spec : 'Not provided',
+            Icons.workspace_premium_outlined,
+          ),
+          const SizedBox(height: 16),
+
+          _buildProfileFieldRow(
+            'Email Address',
+            email.isNotEmpty ? email : 'Not provided',
+            Icons.email_outlined,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClinicInfoCard() {
+    final colors = WisteriaColors.of(context);
+    final clinicName = _clinicNameController.text.trim();
+    final clinicAddr = _clinicAddressController.text.trim();
+    final clinicPhone = _clinicPhoneController.text.trim();
+    final signature = _signatureController.text.trim();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: colors.surfaceLow,
+        borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+        border: Border.all(color: colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            'Clinic & Professional Details',
+            Icons.local_hospital_outlined,
+          ),
+          const SizedBox(height: 20),
+
+          _buildProfileFieldRow(
+            'Clinic Name',
+            clinicName.isNotEmpty ? clinicName : 'Not provided',
+            Icons.business_outlined,
+          ),
+          const SizedBox(height: 14),
+
+          _buildProfileFieldRow(
+            'Clinic Address',
+            clinicAddr.isNotEmpty ? clinicAddr : 'Not provided',
+            Icons.location_on_outlined,
+          ),
+          const SizedBox(height: 14),
+
+          _buildProfileFieldRow(
+            'Clinic Phone Number',
+            clinicPhone.isNotEmpty ? clinicPhone : 'Not provided',
+            Icons.phone_outlined,
+          ),
+          const SizedBox(height: 14),
+
+          _buildProfileFieldRow(
+            'Doctor Signature',
+            signature.isNotEmpty ? signature : 'Not provided',
+            Icons.draw_outlined,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileFieldRow(String label, String value, IconData icon) {
+    final colors = WisteriaColors.of(context);
+    final isNotProvided = value == 'Not provided';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: colors.textMuted,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isNotProvided ? colors.textMuted : colors.textSecondary,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isNotProvided ? FontWeight.w400 : FontWeight.w500,
+                  color: isNotProvided ? colors.textMuted : colors.textPrimary,
+                  fontStyle: isNotProvided
+                      ? FontStyle.italic
+                      : FontStyle.normal,
+                ),
+              ),
             ),
           ],
         ),
@@ -327,147 +575,331 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     );
   }
 
-  Widget _buildProfileCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: WisteriaColors.surfaceLow,
-        borderRadius: BorderRadius.circular(WisteriaRadius.lg),
-        border: Border.all(color: WisteriaColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSectionLabel('Doctor Information'),
-
-          const SizedBox(height: 20),
-
-          _buildProfileField('Doctor Name', _doctorNameController.text),
-
-          _buildProfileField('Specialization', _specializationController.text),
-
-          _buildProfileField('Email', _emailController.text),
-
-          const SizedBox(height: 12),
-
-          _buildSectionLabel('Clinic Details'),
-
-          const SizedBox(height: 20),
-
-          _buildProfileField('Clinic Name', _clinicNameController.text),
-
-          _buildProfileField('Clinic Address', _clinicAddressController.text),
-
-          _buildProfileField(
-            'Clinic Phone Number',
-            _clinicPhoneController.text,
-          ),
-
-          const SizedBox(height: 12),
-
-          _buildSectionLabel('Signature'),
-
-          const SizedBox(height: 20),
-
-          _buildProfileField('Signature', _signatureController.text),
-        ],
-      ),
-    );
-  }
-
   Widget _buildDocumentCard() {
+    final colors = WisteriaColors.of(context);
     final hasDocument = _documentPath != null && _documentPath!.isNotEmpty;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: WisteriaColors.surfaceLow,
-        borderRadius: BorderRadius.circular(WisteriaRadius.lg),
-        border: Border.all(color: WisteriaColors.border),
+        color: colors.surfaceLow,
+        borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionLabel('Doctor Document'),
-
-          const SizedBox(height: 20),
-
-          if (hasDocument)
-            Row(
-              children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildSectionHeader(
+                'Doctor Document',
+                Icons.picture_as_pdf_outlined,
+              ),
+              if (hasDocument)
                 Container(
-                  width: 44,
-                  height: 44,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: WisteriaColors.primary.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(WisteriaRadius.md),
-                  ),
-                  child: const Icon(
-                    Icons.picture_as_pdf_outlined,
-                    color: WisteriaColors.primary,
-                  ),
-                ),
-
-                const SizedBox(width: 14),
-
-                Expanded(
-                  child: Text(
-                    _documentFileName ?? 'Doctor document',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: WisteriaColors.textPrimary,
+                    color: colors.success.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+                    border: Border.all(
+                      color: colors.success.withValues(alpha: 0.25),
                     ),
                   ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle_rounded,
+                        size: 13,
+                        color: colors.success,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Uploaded',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: colors.success,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            )
-          else
-            const Text(
-              'No doctor document added.',
-              style: TextStyle(fontSize: 13, color: WisteriaColors.textMuted),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          if (hasDocument) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: colors.surfaceLowest,
+                borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+                border: Border.all(color: colors.borderSubtle),
+              ),
+              child: Row(
+                children: [
+                  // Compact PDF Thumbnail Box
+                  Container(
+                    width: 56,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEF4444).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+                      border: Border.all(
+                        color: const Color(0xFFEF4444).withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(
+                          Icons.picture_as_pdf_rounded,
+                          color: Color(0xFFEF4444),
+                          size: 24,
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'PDF',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFFEF4444),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(width: 16),
+
+                  // File metadata
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _documentFileName ??
+                              (_documentPath != null
+                                  ? path.basename(_documentPath!)
+                                  : 'doctor_document.pdf'),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: colors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Medical License / Credentials • PDF Document',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  // Action Buttons
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: _openDocument,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: colors.primary,
+                          side: BorderSide(
+                            color: colors.primary.withValues(alpha: 0.4),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              WisteriaRadius.sm,
+                            ),
+                          ),
+                        ),
+                        icon: const Icon(Icons.open_in_new_rounded, size: 15),
+                        label: const Text(
+                          'View PDF',
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: _isPickingDocument
+                            ? null
+                            : _pickDoctorDocument,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: colors.textSecondary,
+                          side: BorderSide(color: colors.border),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              WisteriaRadius.sm,
+                            ),
+                          ),
+                        ),
+                        icon: _isPickingDocument
+                            ? const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.upload_file_rounded, size: 15),
+                        label: Text(
+                          _isPickingDocument ? 'Uploading...' : 'Replace',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
+          ] else ...[
+            // Empty State
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              decoration: BoxDecoration(
+                color: colors.surfaceLowest,
+                borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+                border: Border.all(color: colors.borderSubtle),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: colors.primary.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+                    ),
+                    child: Icon(
+                      Icons.upload_file_outlined,
+                      color: colors.primary,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'No Doctor Document Uploaded',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: colors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Upload a PDF copy of your medical license, certification, or clinic credentials.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    onPressed: _isPickingDocument ? null : _pickDoctorDocument,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.primaryMuted,
+                      foregroundColor: colors.textOnPrimary,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+                      ),
+                    ),
+                    icon: _isPickingDocument
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.upload_file_rounded, size: 16),
+                    label: Text(
+                      _isPickingDocument ? 'Uploading...' : 'Upload Document',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
   Widget _buildEditProfile() {
+    final colors = WisteriaColors.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildHeader(),
 
-        const SizedBox(height: 32),
+        const SizedBox(height: 28),
 
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
-            color: WisteriaColors.surfaceLow,
-            borderRadius: BorderRadius.circular(WisteriaRadius.lg),
-            border: Border.all(color: WisteriaColors.border),
+            color: colors.surfaceLow,
+            borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+            border: Border.all(color: colors.border),
           ),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionLabel('Doctor Information'),
+                _buildSectionHeader('Doctor Information', Icons.badge_outlined),
 
                 const SizedBox(height: 16),
 
                 TextFormField(
                   controller: _doctorNameController,
-                  style: const TextStyle(color: WisteriaColors.textPrimary),
+                  style: TextStyle(color: colors.textPrimary),
                   decoration: const InputDecoration(labelText: 'Doctor Name'),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Doctor name is required';
                     }
-
                     return null;
                   },
                 ),
@@ -476,7 +908,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
                 TextFormField(
                   controller: _specializationController,
-                  style: const TextStyle(color: WisteriaColors.textPrimary),
+                  style: TextStyle(color: colors.textPrimary),
                   decoration: const InputDecoration(
                     labelText: 'Specialization',
                   ),
@@ -487,19 +919,22 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(color: WisteriaColors.textPrimary),
-                  decoration: const InputDecoration(labelText: 'Email'),
+                  style: TextStyle(color: colors.textPrimary),
+                  decoration: const InputDecoration(labelText: 'Email Address'),
                 ),
 
                 const SizedBox(height: 32),
 
-                _buildSectionLabel('Clinic Details'),
+                _buildSectionHeader(
+                  'Clinic & Professional Details',
+                  Icons.local_hospital_outlined,
+                ),
 
                 const SizedBox(height: 16),
 
                 TextFormField(
                   controller: _clinicNameController,
-                  style: const TextStyle(color: WisteriaColors.textPrimary),
+                  style: TextStyle(color: colors.textPrimary),
                   decoration: const InputDecoration(labelText: 'Clinic Name'),
                 ),
 
@@ -508,7 +943,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                 TextFormField(
                   controller: _clinicAddressController,
                   maxLines: 3,
-                  style: const TextStyle(color: WisteriaColors.textPrimary),
+                  style: TextStyle(color: colors.textPrimary),
                   decoration: const InputDecoration(
                     labelText: 'Clinic Address',
                     alignLabelWithHint: true,
@@ -520,7 +955,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                 TextFormField(
                   controller: _clinicPhoneController,
                   keyboardType: TextInputType.phone,
-                  style: const TextStyle(color: WisteriaColors.textPrimary),
+                  style: TextStyle(color: colors.textPrimary),
                   decoration: const InputDecoration(
                     labelText: 'Clinic Phone Number',
                   ),
@@ -528,50 +963,57 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
                 const SizedBox(height: 32),
 
-                _buildSectionLabel('Signature'),
+                _buildSectionHeader('Doctor Signature', Icons.draw_outlined),
 
                 const SizedBox(height: 16),
 
                 TextFormField(
                   controller: _signatureController,
                   maxLines: 2,
-                  style: const TextStyle(color: WisteriaColors.textPrimary),
+                  style: TextStyle(color: colors.textPrimary),
                   decoration: const InputDecoration(
-                    labelText: 'Signature',
-                    hintText: 'Signature information / reference',
+                    labelText: 'Signature Information / Details',
                     alignLabelWithHint: true,
                   ),
                 ),
 
                 const SizedBox(height: 32),
 
-                _buildSectionLabel('Doctor Document'),
+                _buildSectionHeader(
+                  'Doctor Document',
+                  Icons.picture_as_pdf_outlined,
+                ),
 
                 const SizedBox(height: 16),
 
-                if (_documentFileName != null)
+                if (_documentFileName != null || _documentPath != null)
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(WisteriaRadius.md),
-                      border: Border.all(color: WisteriaColors.border),
+                      color: colors.surfaceLowest,
+                      borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+                      border: Border.all(color: colors.border),
                     ),
                     child: Row(
                       children: [
                         const Icon(
                           Icons.picture_as_pdf_outlined,
-                          color: WisteriaColors.primary,
+                          color: Color(0xFFEF4444),
                         ),
 
                         const SizedBox(width: 12),
 
                         Expanded(
                           child: Text(
-                            _documentFileName!,
-                            style: const TextStyle(
+                            _documentFileName ??
+                                (_documentPath != null
+                                    ? path.basename(_documentPath!)
+                                    : 'Selected Document'),
+                            style: TextStyle(
                               fontSize: 13,
-                              color: WisteriaColors.textPrimary,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textPrimary,
                             ),
                           ),
                         ),
@@ -579,18 +1021,26 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                     ),
                   )
                 else
-                  const Text(
+                  Text(
                     'No PDF selected.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: WisteriaColors.textMuted,
-                    ),
+                    style: TextStyle(fontSize: 13, color: colors.textMuted),
                   ),
 
                 const SizedBox(height: 14),
 
                 OutlinedButton.icon(
                   onPressed: _isPickingDocument ? null : _pickDoctorDocument,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: colors.primary,
+                    side: BorderSide(color: colors.border),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 14,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+                    ),
+                  ),
                   icon: _isPickingDocument
                       ? const SizedBox(
                           width: 16,
@@ -601,39 +1051,69 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                   label: Text(
                     _isPickingDocument
                         ? 'Selecting...'
-                        : _documentFileName == null
-                        ? 'Add PDF'
-                        : 'Replace PDF',
+                        : _documentFileName == null && _documentPath == null
+                        ? 'Add PDF Document'
+                        : 'Replace PDF Document',
                   ),
                 ),
 
                 const SizedBox(height: 36),
 
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _isSaving ? null : _cancelEditing,
-                        child: const Text('Cancel'),
+                    OutlinedButton(
+                      onPressed: _isSaving ? null : _cancelEditing,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: colors.textSecondary,
+                        side: BorderSide(color: colors.border),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            WisteriaRadius.sm,
+                          ),
+                        ),
                       ),
+                      child: const Text('Cancel'),
                     ),
 
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
 
-                    Expanded(
-                      child: FilledButton.icon(
-                        onPressed: _isSaving ? null : _saveProfile,
-                        icon: _isSaving
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: WisteriaColors.textOnPrimary,
-                                ),
-                              )
-                            : const Icon(Icons.save_rounded),
-                        label: Text(_isSaving ? 'Saving...' : 'Save Changes'),
+                    ElevatedButton.icon(
+                      onPressed: _isSaving ? null : _saveProfile,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colors.primaryMuted,
+                        foregroundColor: colors.textOnPrimary,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 28,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            WisteriaRadius.sm,
+                          ),
+                        ),
+                      ),
+                      icon: _isSaving
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.save_rounded, size: 18),
+                      label: Text(
+                        _isSaving ? 'Saving...' : 'Save Changes',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -648,57 +1128,19 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
     );
   }
 
-  Widget _buildProfileField(String label, String value) {
-    final displayValue = value.trim().isEmpty ? 'Not provided' : value.trim();
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: WisteriaColors.textMuted,
-            ),
-          ),
-
-          const SizedBox(height: 6),
-
-          Text(
-            displayValue,
-            style: const TextStyle(
-              fontSize: 15,
-              color: WisteriaColors.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionLabel(String label) {
+  Widget _buildSectionHeader(String title, IconData icon) {
+    final colors = WisteriaColors.of(context);
     return Row(
       children: [
-        Container(
-          width: 3,
-          height: 14,
-          decoration: BoxDecoration(
-            color: WisteriaColors.primary.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-
-        const SizedBox(width: 10),
-
+        Icon(icon, size: 18, color: colors.primary),
+        const SizedBox(width: 8),
         Text(
-          label.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: WisteriaColors.textMuted,
-            letterSpacing: 1.2,
+          title.toUpperCase(),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: colors.primary,
+            letterSpacing: 1.0,
           ),
         ),
       ],

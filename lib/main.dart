@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'app_shell.dart';
 import 'core/database/database.dart';
+import 'core/services/model_registry_service.dart';
 import 'core/theme/wisteria_theme.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await WisteriaThemeController.init();
   final database = WisteriaDatabase();
+  await ModelRegistryService(database).synchronizeCatalog();
 
   runApp(WisteriaApp(database: database));
 }

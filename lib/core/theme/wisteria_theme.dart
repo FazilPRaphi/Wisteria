@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 /// Wisteria Design System
 ///
@@ -267,9 +271,40 @@ class WisteriaThemeController {
   static WisteriaColorPalette get currentPalette =>
       isDark ? WisteriaColors.darkPalette : WisteriaColors.lightPalette;
 
+  /// Loads saved theme preference from local app storage.
+  static Future<void> init() async {
+    try {
+      final dir = await getApplicationSupportDirectory();
+      final file = File(p.join(dir.path, 'theme_mode.txt'));
+      if (await file.exists()) {
+        final content = (await file.readAsString()).trim();
+        if (content == 'light') {
+          themeModeNotifier.value = ThemeMode.light;
+        } else if (content == 'dark') {
+          themeModeNotifier.value = ThemeMode.dark;
+        } else if (content == 'system') {
+          themeModeNotifier.value = ThemeMode.system;
+        }
+      }
+    } catch (_) {
+      // Safely fall back to default theme mode on error
+    }
+  }
+
   static void setThemeMode(ThemeMode mode) {
     if (themeModeNotifier.value != mode) {
       themeModeNotifier.value = mode;
+      _saveThemeMode(mode);
+    }
+  }
+
+  static Future<void> _saveThemeMode(ThemeMode mode) async {
+    try {
+      final dir = await getApplicationSupportDirectory();
+      final file = File(p.join(dir.path, 'theme_mode.txt'));
+      await file.writeAsString(mode.name);
+    } catch (_) {
+      // Ignore save failures gracefully
     }
   }
 
@@ -295,11 +330,11 @@ class WisteriaSpacing {
 class WisteriaRadius {
   WisteriaRadius._();
 
-  static const double sm = 8;
-  static const double md = 12;
-  static const double lg = 16;
-  static const double xl = 20;
-  static const double full = 999;
+  static const double sm = 2;
+  static const double md = 2;
+  static const double lg = 3;
+  static const double xl = 4;
+  static const double full = 4;
 }
 
 class WisteriaElevation {
@@ -425,7 +460,7 @@ ThemeData buildWisteriaTheme({Brightness brightness = Brightness.dark}) {
     dialogTheme: DialogThemeData(
       backgroundColor: palette.surfaceContainer,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(WisteriaRadius.xl),
+        borderRadius: BorderRadius.circular(WisteriaRadius.sm),
         side: BorderSide(color: palette.border, width: 1),
       ),
       titleTextStyle: TextStyle(
@@ -441,15 +476,15 @@ ThemeData buildWisteriaTheme({Brightness brightness = Brightness.dark}) {
       filled: true,
       fillColor: palette.surfaceLowest,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(WisteriaRadius.md),
+        borderRadius: BorderRadius.circular(WisteriaRadius.sm),
         borderSide: BorderSide(color: palette.border),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(WisteriaRadius.md),
+        borderRadius: BorderRadius.circular(WisteriaRadius.sm),
         borderSide: BorderSide(color: palette.border),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(WisteriaRadius.md),
+        borderRadius: BorderRadius.circular(WisteriaRadius.sm),
         borderSide: BorderSide(color: palette.primary, width: 1.5),
       ),
       labelStyle: TextStyle(
@@ -467,7 +502,7 @@ ThemeData buildWisteriaTheme({Brightness brightness = Brightness.dark}) {
         foregroundColor: palette.textOnPrimary,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(WisteriaRadius.md),
+          borderRadius: BorderRadius.circular(WisteriaRadius.sm),
         ),
         textStyle: const TextStyle(
           fontFamily: 'Inter',
@@ -482,7 +517,7 @@ ThemeData buildWisteriaTheme({Brightness brightness = Brightness.dark}) {
         foregroundColor: palette.primary,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(WisteriaRadius.md),
+          borderRadius: BorderRadius.circular(WisteriaRadius.sm),
         ),
         textStyle: const TextStyle(
           fontFamily: 'Inter',
@@ -498,7 +533,7 @@ ThemeData buildWisteriaTheme({Brightness brightness = Brightness.dark}) {
       foregroundColor: palette.textOnPrimary,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(WisteriaRadius.lg),
+        borderRadius: BorderRadius.circular(WisteriaRadius.sm),
       ),
     ),
 
@@ -511,7 +546,7 @@ ThemeData buildWisteriaTheme({Brightness brightness = Brightness.dark}) {
         fontSize: 14,
       ),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(WisteriaRadius.md),
+        borderRadius: BorderRadius.circular(WisteriaRadius.sm),
       ),
       behavior: SnackBarBehavior.floating,
     ),
@@ -526,7 +561,7 @@ ThemeData buildWisteriaTheme({Brightness brightness = Brightness.dark}) {
     // ── ListTile ──
     listTileTheme: ListTileThemeData(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(WisteriaRadius.md),
+        borderRadius: BorderRadius.circular(WisteriaRadius.sm),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     ),

@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../services/model_registry_service.dart';
 import '../database.dart';
 
 class MedicalModelRepository {
@@ -96,35 +97,7 @@ class MedicalModelRepository {
   static const String bundledVersionId = 'wisteria-pneumonia-resnet18-v1';
 
   Future<({String modelId, String versionId})> ensureBundledPneumoniaModel() async {
-    // Check if model already exists.
-    final existingModel = await getModelById(bundledModelId);
-
-    if (existingModel == null) {
-      await createModel(
-        id: bundledModelId,
-        name: 'Pneumonia ResNet18',
-        description: 'Binary classification of chest X-ray images for pneumonia detection. Locally bundled ONNX model.',
-        task: 'Pneumonia Classification',
-        modality: 'X-Ray',
-        runtime: 'ONNX Runtime',
-      );
-    }
-
-    // Check if version already exists.
-    final existingVersion = await getVersionById(bundledVersionId);
-
-    if (existingVersion == null) {
-      await registerVersion(
-        id: bundledVersionId,
-        modelId: bundledModelId,
-        version: '1.0.0',
-        filePath: 'assets/models/pneumonia_resnet18.onnx',
-        checksum: 'bundled',
-        compatibility: 'Wisteria 1.0',
-        installationStatus: 'INSTALLED',
-      );
-    }
-
+    await ModelRegistryService(database).synchronizeCatalog();
     return (modelId: bundledModelId, versionId: bundledVersionId);
   }
 }

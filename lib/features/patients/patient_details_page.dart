@@ -7,6 +7,7 @@ import '../shared/wisteria_back_button.dart';
 import '../../core/database/repositories/examination_repository.dart';
 
 import '../examinations/examination_details_page.dart';
+import 'widgets/patient_age_avatar.dart';
 
 class PatientDetailsPage extends StatefulWidget {
   final WisteriaDatabase database;
@@ -466,37 +467,13 @@ class _PatientDetailsPageState extends State<PatientDetailsPage> {
   }
 
   Widget _buildPatientHeader(Patient patient) {
-    final initials = patient.name.isNotEmpty
-        ? patient.name
-              .split(' ')
-              .map((w) => w.isNotEmpty ? w[0] : '')
-              .take(2)
-              .join()
-              .toUpperCase()
-        : '?';
-
+    final colors = WisteriaColors.of(context);
     return Row(
       children: [
-        Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            color: WisteriaColors.primary.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(WisteriaRadius.lg),
-            border: Border.all(
-              color: WisteriaColors.primary.withValues(alpha: 0.2),
-            ),
-          ),
-          child: Center(
-            child: Text(
-              initials,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: WisteriaColors.primary,
-              ),
-            ),
-          ),
+        PatientAgeAvatar(
+          age: patient.age,
+          size: 60,
+          customAccent: colors.primary,
         ),
 
         const SizedBox(width: 20),
