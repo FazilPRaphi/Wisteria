@@ -18,7 +18,7 @@ A doctor-centric desktop application for patient records, medical imaging, and A
 
 ---
 
-## 🩺 Overview
+ ## Overview
 
 **Wisteria** is an offline-first, doctor-centric clinical desktop application designed to bring patient information, medical records, medical imaging, and AI-assisted analysis into one workspace.
 
@@ -26,34 +26,34 @@ Built with Flutter, Wisteria aims to support clinicians in managing patient info
 
 The application combines local data management with a modular design that can support different medical analysis workflows. AI-generated findings are intended to assist clinical review rather than replace a healthcare professional's judgement.
 
-## ✨ Key Features
+ ## Key Features
 
 | Feature | Description |
 |---|---|
-| 🧑‍⚕️ Doctor Profile | Manage doctor profile and professional or clinic information. |
-| 📝 New Patient | Register patient information and create patient records. |
-| 📋 Registered Patients | Browse and manage existing patient records. |
-| 🧠 Medical AI Models | Access the application's locally available AI models and related functionality. |
-| 🩻 Medical Imaging | Support medical-image workflows for compatible image formats and analysis models. |
-| ⚙️ Settings | Configure available application preferences, including the visual theme. |
-| 🔄 Synchronization | Provide a dedicated area for data synchronization functionality. |
-| 💾 Local Data Management | Use SQLite with Drift for structured local data storage. |
-| 📴 Offline-First Workflows | Support core workflows locally where the required data and models are installed. |
+ | Doctor Profile | Manage doctor profile and professional or clinic information. |
+ | New Patient | Register patient information and create patient records. |
+ | Registered Patients | Browse and manage existing patient records. |
+ | Medical AI Models | Access the application's locally available AI models and related functionality. |
+ | Medical Imaging | Support medical-image workflows for compatible image formats and analysis models. |
+ | Settings | Configure available application preferences, including the visual theme. |
+ | Synchronization | Provide a dedicated area for data synchronization functionality. |
+ | Local Data Management | Use SQLite with Drift for structured local data storage. |
+ | Offline-First Workflows | Support core workflows locally where the required data and models are installed. |
 
 > **Development note:** Wisteria is an academic project under active development. The availability of individual features depends on their current implementation.
 
-## 🖥️ Interface Preview
+ ## Interface Preview
 
 Wisteria uses a clean, desktop-first interface designed around rectangular image cards, clear typography, and minimal navigation.
 
-### 🏠 Workspace
+ ### Workspace
 
 The Workspace screen provides quick access to the two primary patient actions:
 
 - **New Patient** — register a new patient record.
 - **Registered Patients** — browse and search the patient directory.
 
-### 🩺 Doctor & System
+ ### Doctor & System
 
 A dedicated section groups the supporting application areas:
 
@@ -62,13 +62,13 @@ A dedicated section groups the supporting application areas:
 - Models
 - Synchronization
 
-### 🌓 Light and Dark Themes
+ ### Light and Dark Themes
 
 Wisteria supports a dark clinical interface and a light interface with a softer, neutral background.
 
 Both themes share the same layout, with carefully balanced colours and contrast to keep labels, descriptions, and actions readable.
 
-## 🎨 Design System
+ ## Design System
 
 Wisteria uses a restrained clinical colour palette with navy surfaces, rose-pink accents, and teal-blue highlights.
 
@@ -76,36 +76,36 @@ Wisteria uses a restrained clinical colour palette with navy surfaces, rose-pink
 
 | Colour | Hex | Usage |
 |---|---|---|
-| 🌑 Deep Navy | `#111923` | Main application background |
-| 🪟 Dark Surface | `#1C2934` | Navigation and supporting surfaces |
-| 🌸 Rose Pink | `#C96A83` | Primary highlights and selected actions |
-| 🩵 Teal Blue | `#0796AF` | Secondary actions and informational highlights |
-| 📝 Soft White | `#F1F5F7` | Primary text |
-| 🔹 Muted Blue-Gray | `#A6B5C1` | Secondary text |
+ | Deep Navy | `#111923` | Main application background |
+ | Dark Surface | `#1C2934` | Navigation and supporting surfaces |
+ | Rose Pink | `#C96A83` | Primary highlights and selected actions |
+ | Teal Blue | `#0796AF` | Secondary actions and informational highlights |
+ | Soft White | `#F1F5F7` | Primary text |
+ | Muted Blue-Gray | `#A6B5C1` | Secondary text |
 
 ### Light Mode
 
 | Colour | Hex | Usage |
 |---|---|---|
-| ☁️ Soft Off-White | `#F1F5F5` | Main application background |
-| 🪟 White Surface | `#FFFFFF` | Cards and content surfaces |
-| 🌸 Rose Pink | `#C96A83` | Primary highlights and selected actions |
-| 🩵 Teal Blue | `#0796AF` | Secondary actions and informational highlights |
-| 📝 Dark Navy | `#202B35` | Primary text |
-| 🔹 Muted Blue-Gray | `#718493` | Secondary text |
+ | Soft Off-White | `#F1F5F5` | Main application background |
+ | White Surface | `#FFFFFF` | Cards and content surfaces |
+ | Rose Pink | `#C96A83` | Primary highlights and selected actions |
+ | Teal Blue | `#0796AF` | Secondary actions and informational highlights |
+ | Dark Navy | `#202B35` | Primary text |
+ | Muted Blue-Gray | `#718493` | Secondary text |
 
 *These values document the intended visual palette and should be aligned with the final theme constants in the Flutter code.*
 
 ### Design Principles
 
-- 🧭 Clear navigation without a sidebar.
-- 🖼️ Relevant photographic assets for key sections.
-- ◻️ Rectangular cards with restrained borders and shadows.
-- 👁️ Readable text and action labels over image backgrounds.
-- 🌓 Consistent layouts across light and dark modes.
-- 🎯 Minimal visual clutter, with colour used to establish hierarchy.
+ - Clear navigation without a sidebar.
+ - Relevant photographic assets for key sections.
+ - Rectangular cards with restrained borders and shadows.
+ - Readable text and action labels over image backgrounds.
+ - Consistent layouts across light and dark modes.
+ - Minimal visual clutter, with colour used to establish hierarchy.
 
-## 🧰 Tech Stack
+ ## Tech Stack
 
 | Technology | Purpose |
 |---|---|
@@ -118,7 +118,7 @@ Wisteria uses a restrained clinical colour palette with navy surfaces, rose-pink
 | [Git](https://git-scm.com/) | Version control |
 | [GitHub](https://github.com/) | Source-code hosting and collaboration |
 
-## 🏗️ Architecture Overview
+ ## Architecture Overview
 
 The application follows a modular approach that separates the user interface, data access, local storage, and AI-related functionality.
 
@@ -138,7 +138,7 @@ flowchart TD
 
 *This diagram represents the high-level application concept, not a guarantee that every connection shown is fully implemented.*
 
-## 📁 Project Structure
+ ## Project Structure
 
 The following is a guide to the main project assets and configuration files.
 
@@ -169,7 +169,7 @@ Wisteria/
 
 **Note:** The asset names above describe the intended structure. Keep only the filenames that actually exist in your repository, and retain any additional existing assets and source folders. The ONNX model belongs in `assets/models/` and should not be moved or renamed without updating its references in the code.
 
-## 🚀 Getting Started
+ ## Getting Started
 
 ### Prerequisites
 
@@ -216,7 +216,7 @@ Only when database definitions or other generated files need updating, run:
 dart run build_runner build --delete-conflicting-outputs
 ```
 
-## 🗄️ Local Data Management
+ ## Local Data Management
 
 Wisteria uses SQLite with Drift to organise application data locally.
 
@@ -231,18 +231,18 @@ The existing database implementation includes data areas such as:
 
 The exact database schema and relationships are defined in the application source code.
 
-## 🔐 Privacy and Offline-First Approach
+ ## Privacy and Offline-First Approach
 
 Wisteria is designed to support local clinical workflows without continuous internet access.
 
-- 📴 Core offline functionality can operate with the necessary local data and models available.
-- 💾 Patient data can be stored in the local database.
-- 🧠 Compatible installed models can support local inference.
-- 👩‍⚕️ AI findings should be reviewed by a qualified healthcare professional.
+ - Core offline functionality can operate with the necessary local data and models available.
+ - Patient data can be stored in the local database.
+ - Compatible installed models can support local inference.
+ - AI findings should be reviewed by a qualified healthcare professional.
 
 **Important:** Offline operation alone does not guarantee complete data security. Appropriate device security, access controls, backups, and protection of locally stored information remain important.
 
-## 🤝 Contributing
+ ## Contributing
 
 Wisteria is developed collaboratively as an academic project.
 
@@ -257,7 +257,7 @@ To contribute:
 
 Please avoid committing patient-identifiable information, credentials, API keys, or other sensitive data.
 
-## 📄 License
+ ## License
 
 See the repository's `LICENSE` file for the applicable license terms.
 
@@ -265,7 +265,7 @@ See the repository's `LICENSE` file for the applicable license terms.
 
 <div align="center">
 
-**Built with ❤️ for offline-first clinical workflows**
+ **Built with care for offline-first clinical workflows**
 
 🌸 *Project Wisteria — Bringing patient records and AI-assisted analysis together.*
 
