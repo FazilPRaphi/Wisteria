@@ -48,7 +48,7 @@ class DashboardPage extends StatelessWidget {
       icon: Icons.auto_awesome_rounded,
       route: 'ai',
       isHero: true,
-      accentColor: Color(0xFFA78BFA),
+      accentColor: WisteriaColors.tertiary,
     ),
     DashboardCardData(
       title: 'Analytics',
@@ -79,8 +79,9 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
     return Scaffold(
-      backgroundColor: WisteriaColors.background,
+      backgroundColor: colors.background,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(

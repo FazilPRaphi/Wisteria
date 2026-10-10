@@ -345,6 +345,7 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
@@ -359,7 +360,7 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: WisteriaColors.background,
+        backgroundColor: colors.background,
         body: SafeArea(
           child: Column(
             children: [

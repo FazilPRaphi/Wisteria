@@ -51,8 +51,9 @@ class _WorkspaceShellState extends State<WorkspaceShell> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
     return Scaffold(
-      backgroundColor: WisteriaColors.background,
+      backgroundColor: colors.background,
       body: KeyboardListener(
         focusNode: FocusNode()..requestFocus(),
         autofocus: true,
@@ -134,13 +135,14 @@ class _WorkspaceNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         decoration: BoxDecoration(
-          color: WisteriaColors.surfaceContainer,
+          color: colors.surfaceContainer,
           borderRadius: BorderRadius.circular(WisteriaRadius.full),
-          border: Border.all(color: WisteriaColors.border),
+          border: Border.all(color: colors.border),
           boxShadow: WisteriaElevation.medium,
         ),
         child: Row(
@@ -189,6 +191,7 @@ class _NavSegmentState extends State<_NavSegment> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _isHovered = true),
@@ -200,9 +203,9 @@ class _NavSegmentState extends State<_NavSegment> {
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
           decoration: BoxDecoration(
             color: widget.isActive
-                ? WisteriaColors.primaryMuted.withValues(alpha: 0.9)
+                ? colors.primaryMuted.withValues(alpha: 0.9)
                 : _isHovered
-                ? WisteriaColors.surfaceHigh
+                ? colors.surfaceHigh
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(WisteriaRadius.full),
           ),
@@ -213,10 +216,10 @@ class _NavSegmentState extends State<_NavSegment> {
                 widget.icon,
                 size: 16,
                 color: widget.isActive
-                    ? WisteriaColors.textOnPrimary
+                    ? colors.textOnPrimary
                     : _isHovered
-                    ? WisteriaColors.textPrimary
-                    : WisteriaColors.textSecondary,
+                    ? colors.textPrimary
+                    : colors.textSecondary,
               ),
               const SizedBox(width: 8),
               Text(
@@ -227,10 +230,10 @@ class _NavSegmentState extends State<_NavSegment> {
                       ? FontWeight.w600
                       : FontWeight.w500,
                   color: widget.isActive
-                      ? WisteriaColors.textOnPrimary
+                      ? colors.textOnPrimary
                       : _isHovered
-                      ? WisteriaColors.textPrimary
-                      : WisteriaColors.textSecondary,
+                      ? colors.textPrimary
+                      : colors.textSecondary,
                 ),
               ),
             ],
@@ -262,6 +265,7 @@ class _EdgeArrowState extends State<_EdgeArrow> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = WisteriaColors.of(context);
     return Center(
       child: Tooltip(
         message: widget.tooltip,
@@ -277,21 +281,21 @@ class _EdgeArrowState extends State<_EdgeArrow> {
               height: 72,
               decoration: BoxDecoration(
                 color: _isHovered
-                    ? WisteriaColors.primary.withValues(alpha: 0.12)
-                    : WisteriaColors.surfaceLow.withValues(alpha: 0.6),
+                    ? colors.primary.withValues(alpha: 0.12)
+                    : colors.surfaceLow.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(WisteriaRadius.md),
                 border: Border.all(
                   color: _isHovered
-                      ? WisteriaColors.primary.withValues(alpha: 0.3)
-                      : WisteriaColors.border.withValues(alpha: 0.4),
+                      ? colors.primary.withValues(alpha: 0.3)
+                      : colors.border.withValues(alpha: 0.4),
                 ),
               ),
               child: Icon(
                 widget.icon,
                 size: 24,
                 color: _isHovered
-                    ? WisteriaColors.primary
-                    : WisteriaColors.textMuted,
+                    ? colors.primary
+                    : colors.textMuted,
               ),
             ),
           ),
