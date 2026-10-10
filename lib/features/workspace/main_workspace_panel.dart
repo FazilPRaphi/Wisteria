@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../core/database/database.dart';
 import '../../core/theme/wisteria_theme.dart';
+import '../patients/new_patient_registration_page.dart';
 import '../patients/patient_page.dart';
+import '../shared/wisteria_page_route.dart';
 
-/// Panel A — Main Workspace
+/// Panel A — Main Workspace Landing Page
 ///
-/// Two large cards: Patients and AI Workplace.
+/// Displays two hero cards: New Patient (faded medical-red) & Registered Patients (clinical teal).
 class MainWorkspacePanel extends StatelessWidget {
   final WisteriaDatabase database;
 
@@ -72,6 +74,9 @@ class MainWorkspacePanel extends StatelessWidget {
   Widget _buildMainCards(BuildContext context, double maxWidth) {
     final isNarrow = maxWidth < 700;
     final colors = WisteriaColors.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final redAccent =
+        isDark ? const Color(0xFFC998A2) : const Color(0xFF96162C);
 
     if (isNarrow) {
       return Column(
@@ -81,7 +86,7 @@ class MainWorkspacePanel extends StatelessWidget {
               title: 'New Patient',
               subtitle: 'Register a new patient record',
               icon: Icons.person_add_rounded,
-              accentColor: WisteriaColors.pink,
+              accentColor: redAccent,
               tintColor: WisteriaColors.pink,
               imagePath: 'assets/images/new_patients.jpg',
               onTap: () => _navigateToNewPatient(context),
@@ -110,7 +115,7 @@ class MainWorkspacePanel extends StatelessWidget {
             title: 'New Patient',
             subtitle: 'Register a new patient record',
             icon: Icons.person_add_rounded,
-            accentColor: WisteriaColors.pink,
+            accentColor: redAccent,
             tintColor: WisteriaColors.pink,
             imagePath: 'assets/images/new_patients.jpg',
             onTap: () => _navigateToNewPatient(context),
@@ -134,58 +139,22 @@ class MainWorkspacePanel extends StatelessWidget {
 
   void _navigateToNewPatient(BuildContext context) {
     Navigator.of(context).push(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            PatientPage(database: database, autoOpenAddPatient: true),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position:
-                Tween<Offset>(
-                  begin: const Offset(0, 0.05),
-                  end: Offset.zero,
-                ).animate(
-                  CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  ),
-                ),
-            child: FadeTransition(opacity: animation, child: child),
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 280),
-        reverseTransitionDuration: const Duration(milliseconds: 200),
+      WisteriaPageRoute(
+        page: NewPatientRegistrationPage(database: database),
       ),
     );
   }
 
   void _navigateToRegisteredPatients(BuildContext context) {
     Navigator.of(context).push(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            PatientPage(database: database, initialShowRegistry: true),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position:
-                Tween<Offset>(
-                  begin: const Offset(0, 0.05),
-                  end: Offset.zero,
-                ).animate(
-                  CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  ),
-                ),
-            child: FadeTransition(opacity: animation, child: child),
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 280),
-        reverseTransitionDuration: const Duration(milliseconds: 200),
+      WisteriaPageRoute(
+        page: PatientPage(database: database, initialShowRegistry: true),
       ),
     );
   }
 }
 
-/// Large, visually prominent hero card for main workspace actions.
+/// Sharp, visually prominent hero card for main workspace landing page.
 class _WorkspaceHeroCard extends StatefulWidget {
   final String title;
   final String subtitle;
@@ -267,7 +236,7 @@ class _WorkspaceHeroCardState extends State<_WorkspaceHeroCard>
               offset: Offset(0, -1 * t),
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.zero,
+                  borderRadius: BorderRadius.circular(WisteriaRadius.sm),
                   border: Border.all(
                     color: borderColor,
                     width: 1,
@@ -282,7 +251,8 @@ class _WorkspaceHeroCardState extends State<_WorkspaceHeroCard>
                     ),
                   ],
                 ),
-                child: ClipRect(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(WisteriaRadius.sm),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -304,7 +274,7 @@ class _WorkspaceHeroCardState extends State<_WorkspaceHeroCard>
                                 const SizedBox.shrink(),
                           ),
                         ),
-                      // Subtle pink or blue/teal tinted gradient overlay: clear at top, gentle ramp near bottom
+                      // Subtle pink/red or teal tinted gradient overlay
                       Positioned.fill(
                         child: Container(
                           decoration: BoxDecoration(
@@ -375,7 +345,7 @@ class _WorkspaceHeroCardState extends State<_WorkspaceHeroCard>
                           ),
                         ),
                       ),
-                      // Foreground card content with exact existing layout
+                      // Foreground card content
                       Padding(
                         padding: const EdgeInsets.all(36),
                         child: child,
@@ -451,13 +421,13 @@ class _WorkspaceHeroCardState extends State<_WorkspaceHeroCard>
   Widget _buildIcon(bool isDark) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      width: 64,
-      height: 64,
+      width: 56,
+      height: 56,
       decoration: BoxDecoration(
         color: isDark
             ? const Color(0xFF192831).withValues(alpha: _isHovered ? 0.90 : 0.80)
             : Colors.white.withValues(alpha: _isHovered ? 0.95 : 0.88),
-        borderRadius: BorderRadius.circular(WisteriaRadius.lg),
+        borderRadius: BorderRadius.circular(WisteriaRadius.sm),
         border: Border.all(
           color: _isHovered
               ? widget.accentColor.withValues(alpha: 0.50)
@@ -466,15 +436,15 @@ class _WorkspaceHeroCardState extends State<_WorkspaceHeroCard>
         ),
         boxShadow: [
           BoxShadow(
-            blurRadius: 8,
+            blurRadius: 6,
             offset: const Offset(0, 2),
-            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
+            color: Colors.black.withValues(alpha: isDark ? 0.22 : 0.05),
           ),
         ],
       ),
       child: Icon(
         widget.icon,
-        size: 30,
+        size: 26,
         color: widget.accentColor,
       ),
     );

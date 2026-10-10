@@ -43,6 +43,7 @@ dependencies:
   crypto: ^3.0.7
   flutter_onnxruntime: ^1.8.5
   image: ^4.10.1
+  pdfrx: ^2.4.8
 
 dev_dependencies:
   flutter_test:
