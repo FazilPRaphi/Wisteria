@@ -487,120 +487,128 @@ class _PatientCardState extends State<_PatientCard> {
                   ]
                 : [],
           ),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              PatientProfileBackground(
-                age: patient.age,
-                dateOfBirth: patient.dateOfBirth,
-                gender: patient.gender,
-              ),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: isDark ? 0.58 : 0.64),
-                    ],
-                    stops: const [0.42, 1.0],
+          child: ClipRect(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                PatientProfileBackground(
+                  age: patient.age,
+                  dateOfBirth: patient.dateOfBirth,
+                  gender: patient.gender,
+                ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        isDark
+                            ? const Color(0xFF14171A).withValues(alpha: 0.82)
+                            : const Color(0xFFE8EEF3).withValues(alpha: 0.88),
+                      ],
+                      stops: const [0.38, 1.0],
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Preserve the card's navigation affordance without a profile icon.
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? (_isHovered
-                                    ? const Color(0xFF3D3D3D)
-                                    : Colors.transparent)
-                              : (_isHovered
-                                    ? colors.primary.withValues(alpha: 0.12)
-                                    : Colors.transparent),
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        child: Icon(
-                          Icons.chevron_right_rounded,
-                          size: 20,
-                          color: isDark
-                              ? (_isHovered ? Colors.white : colors.textMuted)
-                              : (_isHovered
-                                    ? colors.primary
-                                    : colors.textMuted),
-                        ),
-                      ),
-                    ),
-
-                    const Spacer(),
-
-                    Text(
-                      patient.name,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        letterSpacing: -0.1,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const SizedBox(height: 3),
-
-                    Text(
-                      patient.id,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.white.withValues(alpha: 0.78),
-                        fontFamily: 'monospace',
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    Row(
-                      children: [
-                        if (patient.age != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 7,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colors.primary.withValues(alpha: 0.90),
-                              borderRadius: BorderRadius.zero,
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.55),
-                              ),
-                            ),
-                            child: Text(
-                              '${patient.age} yrs',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: colors.textOnPrimary,
-                              ),
-                            ),
+                Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Preserve the card's navigation affordance without a profile icon.
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? (_isHovered
+                                      ? const Color(0xFF3D3D3D)
+                                      : Colors.transparent)
+                                : (_isHovered
+                                      ? colors.primary.withValues(alpha: 0.12)
+                                      : Colors.transparent),
+                            borderRadius: BorderRadius.zero,
                           ),
-                      ],
-                    ),
-                  ],
+                          child: Icon(
+                            Icons.chevron_right_rounded,
+                            size: 20,
+                            color: isDark
+                                ? (_isHovered ? Colors.white : colors.textMuted)
+                                : (_isHovered
+                                      ? colors.primary
+                                      : colors.textMuted),
+                          ),
+                        ),
+                      ),
+
+                      const Spacer(),
+
+                      Text(
+                        patient.name,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : colors.textPrimary,
+                          letterSpacing: -0.1,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+
+                      const SizedBox(height: 3),
+
+                      Text(
+                        patient.id,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.78)
+                              : colors.textSecondary,
+                          fontFamily: 'monospace',
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Row(
+                        children: [
+                          if (patient.age != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.primary.withValues(alpha: 0.90),
+                                borderRadius: BorderRadius.zero,
+                                border: Border.all(
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.55)
+                                      : colors.primary.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Text(
+                                '${patient.age} yrs',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: colors.textOnPrimary,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
