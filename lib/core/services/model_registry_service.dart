@@ -1,3 +1,4 @@
+
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -12,14 +13,10 @@ class ModelRegistryService {
   /// Synchronizes the local database registry with the authoritative [SystemModelCatalog].
   ///
   /// This method is idempotent:
-  /// 1. Safely removes obsolete/unwanted test model entries (such as 'john').
-  /// 2. Upserts predefined catalog models in [database.medicalModels].
-  /// 3. Checks actual asset file availability to assign correct [installationStatus].
-  /// 4. Upserts model versions in [database.modelVersions].
+  /// 1. Upserts predefined catalog models in [database.medicalModels].
+  /// 2. Checks actual asset file availability to assign correct [installationStatus].
+  /// 3. Upserts model versions in [database.modelVersions].
   Future<void> synchronizeCatalog() async {
-    // Step 1: Remove unwanted test models (e.g. 'john')
-    await _removeObsoleteTestModels();
-
     // Step 2: Synchronize predefined catalog models
     for (final catalogModel in SystemModelCatalog.allModels) {
       final status = await _checkInstallationStatus(catalogModel);
@@ -108,28 +105,6 @@ class ModelRegistryService {
       }
     } catch (_) {
       return 'NOT_INSTALLED';
-    }
-  }
-
-  Future<void> _removeObsoleteTestModels() async {
-    // Delete any test models named or IDed as 'john' (case-insensitive)
-    final allModels = await database.select(database.medicalModels).get();
-
-    for (final model in allModels) {
-      final idLower = model.id.toLowerCase();
-      final nameLower = model.name.toLowerCase();
-
-      if (idLower == 'john' || nameLower == 'john') {
-        // Delete child versions first if present
-        await (database.delete(
-          database.modelVersions,
-        )..where((v) => v.modelId.equals(model.id))).go();
-
-        // Delete model entry
-        await (database.delete(
-          database.medicalModels,
-        )..where((m) => m.id.equals(model.id))).go();
-      }
     }
   }
 }
