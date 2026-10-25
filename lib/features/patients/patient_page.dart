@@ -579,27 +579,14 @@ class _PatientCardState extends State<_PatientCard> {
                       Row(
                         children: [
                           if (patient.age != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: colors.primary.withValues(alpha: 0.90),
-                                borderRadius: BorderRadius.zero,
-                                border: Border.all(
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.55)
-                                      : colors.primary.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              child: Text(
-                                '${patient.age} yrs',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: colors.textOnPrimary,
-                                ),
+                            Text(
+                              '${patient.age} yrs',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.78)
+                                    : colors.textSecondary,
                               ),
                             ),
                         ],

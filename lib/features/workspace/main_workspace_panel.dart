@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/database/database.dart';
+import '../../core/database/repositories/doctor_repository.dart';
 import '../../core/theme/wisteria_theme.dart';
 import '../patients/new_patient_registration_page.dart';
 import '../patients/patient_page.dart';
@@ -9,10 +10,31 @@ import '../shared/wisteria_page_route.dart';
 /// Panel A — Main Workspace Landing Page
 ///
 /// Displays two hero cards: New Patient (faded medical-red) & Registered Patients (clinical teal).
-class MainWorkspacePanel extends StatelessWidget {
+class MainWorkspacePanel extends StatefulWidget {
   final WisteriaDatabase database;
 
   const MainWorkspacePanel({super.key, required this.database});
+
+  @override
+  State<MainWorkspacePanel> createState() => _MainWorkspacePanelState();
+}
+
+class _MainWorkspacePanelState extends State<MainWorkspacePanel> {
+  late Stream<DoctorProfile?> _doctorProfileStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _doctorProfileStream = DoctorRepository(widget.database).watchProfile();
+  }
+
+  @override
+  void didUpdateWidget(MainWorkspacePanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.database != widget.database) {
+      _doctorProfileStream = DoctorRepository(widget.database).watchProfile();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,13 +71,16 @@ class MainWorkspacePanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Welcome back, Doctor',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: colors.textPrimary,
-            letterSpacing: -0.3,
+        StreamBuilder<DoctorProfile?>(
+          stream: _doctorProfileStream,
+          builder: (context, snapshot) => Text(
+            _welcomeGreeting(snapshot.hasError ? null : snapshot.data),
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              color: colors.textPrimary,
+              letterSpacing: -0.3,
+            ),
           ),
         ),
         const SizedBox(height: 6),
@@ -140,17 +165,44 @@ class MainWorkspacePanel extends StatelessWidget {
 
   void _navigateToNewPatient(BuildContext context) {
     Navigator.of(context).push(
-      WisteriaPageRoute(page: NewPatientRegistrationPage(database: database)),
+      WisteriaPageRoute(
+        page: NewPatientRegistrationPage(database: widget.database),
+      ),
     );
   }
 
   void _navigateToRegisteredPatients(BuildContext context) {
     Navigator.of(context).push(
       WisteriaPageRoute(
-        page: PatientPage(database: database, initialShowRegistry: true),
+        page: PatientPage(
+          database: widget.database,
+          initialShowRegistry: true,
+        ),
       ),
     );
   }
+}
+
+String _welcomeGreeting(DoctorProfile? profile) {
+  final name = profile?.doctorName.trim() ?? '';
+  final cleaned = name
+      .replaceFirst(
+        RegExp(r'^(?:(?:dr|doctor)\.?\s*)+', caseSensitive: false),
+        '',
+      )
+      .trim();
+
+  if (cleaned.isEmpty) {
+    return 'Welcome back, Doctor';
+  }
+
+  final rawFirstName = cleaned.split(RegExp(r'\s+')).first;
+  if (rawFirstName.isEmpty || rawFirstName.toLowerCase() == 'doctor') {
+    return 'Welcome back, Doctor';
+  }
+
+  final firstName = rawFirstName[0].toUpperCase() + rawFirstName.substring(1);
+  return 'Welcome back, Dr $firstName';
 }
 
 /// Sharp, visually prominent hero card for main workspace landing page.
@@ -345,6 +397,7 @@ class _WorkspaceHeroCardState extends State<_WorkspaceHeroCard>
             );
           },
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Title ──

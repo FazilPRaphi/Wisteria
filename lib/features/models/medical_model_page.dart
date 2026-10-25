@@ -5,7 +5,6 @@ import '../../core/database/repositories/medical_model_repository.dart';
 import '../../core/models/system_model_catalog.dart';
 import '../../core/services/model_registry_service.dart';
 import '../../core/theme/wisteria_theme.dart';
-import 'model_inference_test_page.dart';
 
 class MedicalModelPage extends StatefulWidget {
   final WisteriaDatabase database;
@@ -509,44 +508,6 @@ class _ModelCardState extends State<_ModelCard> {
                             ),
                           );
                         }).toList(),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Actions
-                  FutureBuilder<List<ModelVersion>>(
-                    future: widget.repository.getVersionsForModel(widget.model.id),
-                    builder: (context, snapshot) {
-                      final versions = snapshot.data ?? [];
-                      final isInstalled = versions.any(
-                        (v) => v.installationStatus == 'INSTALLED',
-                      );
-
-                      if (!isInstalled) return const SizedBox.shrink();
-
-                      return Align(
-                        alignment: Alignment.centerRight,
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ModelInferenceTestPage(
-                                  modelId: widget.model.id,
-                                ),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                          label: const Text('Test Model Inference'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: colors.primary,
-                            side: BorderSide(color: colors.primary),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(WisteriaRadius.sm),
-                            ),
-                          ),
-                        ),
                       );
                     },
                   ),

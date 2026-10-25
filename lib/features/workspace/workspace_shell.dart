@@ -184,7 +184,7 @@ class _WorkspaceNavigationBar extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             _NavSegment(
-              icon: Icons.psychology_rounded,
+              icon: Icons.local_hospital_rounded,
               label: 'WisChat',
               isActive: currentPage == 2,
               onTap: () => onPageSelected(2),
