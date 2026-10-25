@@ -47,12 +47,6 @@ void main() {
         'assets/logo/Frame 1.png',
         'assets/logo/logo.svg',
         'assets/logo/Frame 1.svg',
-        'assets/images/patients/child_male.png',
-        'assets/images/patients/child_female.png',
-        'assets/images/patients/adult_male.png',
-        'assets/images/patients/adult_female.png',
-        'assets/images/patients/older_male.png',
-        'assets/images/patients/older_female.png',
       ];
 
       for (final asset in assets) {
@@ -396,18 +390,15 @@ void main() {
         PatientAvatarCategory.childMale,
       );
 
-      expect(
-        getPatientPortraitAsset(PatientAvatarCategory.childMale),
-        'assets/images/patients/child_male.png',
-      );
-      expect(
-        getPatientPortraitAsset(PatientAvatarCategory.adultFemale),
-        'assets/images/patients/adult_female.png',
-      );
-      expect(
-        getPatientPortraitAsset(PatientAvatarCategory.olderAdultNeutral),
-        'assets/images/patients/adult_male.png',
-      );
+      expect(getPatientGenderIcon('Male'), Icons.male);
+      expect(getPatientGenderIcon('male'), Icons.male);
+      expect(getPatientGenderIcon('M'), Icons.male);
+      expect(getPatientGenderIcon('Female'), Icons.female);
+      expect(getPatientGenderIcon('female'), Icons.female);
+      expect(getPatientGenderIcon('F'), Icons.female);
+      expect(getPatientGenderIcon(null), Icons.person);
+      expect(getPatientGenderIcon('Other'), Icons.person);
+      expect(getPatientGenderIcon('unknown'), Icons.person);
     },
   );
 
@@ -457,6 +448,7 @@ void main() {
       // 5. Verify the full-card background has the Older Adult Female tooltip
       expect(find.byType(PatientProfileBackground), findsOneWidget);
       expect(find.byTooltip('Older Adult (Female, 50+ yrs)'), findsOneWidget);
+      expect(find.byIcon(Icons.female), findsOneWidget);
 
       // 6. Verify blood group data in database is completely intact
       final allPatients = await repo.getAllPatients();

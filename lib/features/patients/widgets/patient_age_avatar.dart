@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../core/theme/wisteria_theme.dart';
 
@@ -144,29 +145,20 @@ String getAvatarCategoryLabel(PatientAvatarCategory category) {
   }
 }
 
-String getPatientPortraitAsset(PatientAvatarCategory category) {
-  switch (category) {
-    case PatientAvatarCategory.childMale:
-      return 'assets/images/patients/child_male.png';
-    case PatientAvatarCategory.childFemale:
-      return 'assets/images/patients/child_female.png';
-    case PatientAvatarCategory.adultMale:
-      return 'assets/images/patients/adult_male.png';
-    case PatientAvatarCategory.adultFemale:
-      return 'assets/images/patients/adult_female.png';
-    case PatientAvatarCategory.olderAdultMale:
-      return 'assets/images/patients/older_male.png';
-    case PatientAvatarCategory.olderAdultFemale:
-      return 'assets/images/patients/older_female.png';
-    case PatientAvatarCategory.childNeutral:
-    case PatientAvatarCategory.adultNeutral:
-    case PatientAvatarCategory.olderAdultNeutral:
-    case PatientAvatarCategory.neutralFallback:
-      return 'assets/images/patients/adult_male.png';
-  }
+/// Returns the built-in Material gender icon for a patient record.
+///
+/// - Male: [Icons.male]
+/// - Female: [Icons.female]
+/// - Missing, unrecognized, or other: [Icons.person] (neutral fallback)
+IconData getPatientGenderIcon(String? gender) {
+  if (gender == null) return Icons.person;
+  final g = gender.trim().toLowerCase();
+  if (g == 'male' || g == 'm') return Icons.male;
+  if (g == 'female' || g == 'f') return Icons.female;
+  return Icons.person;
 }
 
-/// Theme-aware, age- and gender-based photographic portrait for patient records.
+/// Theme-aware, age- and gender-based silhouette portrait for patient records.
 class PatientAgeAvatar extends StatelessWidget {
   final int? age;
   final String? gender;
@@ -184,11 +176,19 @@ class PatientAgeAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = WisteriaColors.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final category = getPatientAvatarCategory(
       dateOfBirth: dateOfBirth,
       age: age,
       gender: gender,
     );
+    final icon = getPatientGenderIcon(gender);
+
+    final bg = isDark ? const Color(0xFF22262B) : const Color(0xFFE8EEF3);
+    final fg = isDark
+        ? Colors.white.withValues(alpha: 0.85)
+        : const Color(0xFF1E293B).withValues(alpha: 0.85);
+
     return Tooltip(
       message: getAvatarCategoryLabel(category),
       child: Container(
@@ -196,26 +196,21 @@ class PatientAgeAvatar extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           border: Border.all(color: colors.border),
-          color: colors.surfaceLow,
+          color: bg,
         ),
-        child: Image.asset(
-          getPatientPortraitAsset(category),
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Image.asset(
-              'assets/images/patient info.jpg',
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  ColoredBox(color: colors.surfaceLow),
-            );
-          },
+        child: Center(
+          child: Icon(
+            icon,
+            size: size * 0.62,
+            color: fg,
+          ),
         ),
       ),
     );
   }
 }
 
-/// Full-surface photographic patient portrait for patient cards.
+/// Modern oversized silhouette patient background for patient cards.
 class PatientProfileBackground extends StatelessWidget {
   final int? age;
   final String? gender;
@@ -230,27 +225,64 @@ class PatientProfileBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = WisteriaColors.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final category = getPatientAvatarCategory(
       dateOfBirth: dateOfBirth,
       age: age,
       gender: gender,
     );
+    final icon = getPatientGenderIcon(gender);
+
+    // Theme-aware illustration background:
+    // Light mode: soft pale blue-grey muted surface
+    // Dark mode: charcoal / dark slate muted surface
+    final containerColor = isDark
+        ? const Color(0xFF22262B)
+        : const Color(0xFFE8EEF3);
+
+    // Theme-aware silhouette color:
+    // Light mode: dark slate silhouette for strong contrast
+    // Dark mode: light silhouette for sufficient contrast
+    final silhouetteColor = isDark
+        ? Colors.white.withValues(alpha: 0.18)
+        : const Color(0xFF1E293B).withValues(alpha: 0.22);
 
     return Tooltip(
       message: getAvatarCategoryLabel(category),
-      child: Image.asset(
-        getPatientPortraitAsset(category),
-        fit: BoxFit.cover,
-        cacheWidth: 900,
-        errorBuilder: (context, error, stackTrace) {
-          return Image.asset(
-            'assets/images/patient info.jpg',
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) =>
-                ColoredBox(color: colors.surfaceLow),
-          );
-        },
+      child: ClipRect(
+        child: Container(
+          color: containerColor,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final cardHeight = constraints.maxHeight.isFinite && constraints.maxHeight > 0
+                  ? constraints.maxHeight
+                  : 180.0;
+              // Scale the icon to occupy most of the available illustration area
+              final iconSize = cardHeight * 1.12;
+
+              return Stack(
+                clipBehavior: Clip.hardEdge,
+                children: [
+                  Positioned(
+                    right: -iconSize * 0.10,
+                    top: -iconSize * 0.05,
+                    bottom: -iconSize * 0.05,
+                    child: Center(
+                      child: Transform.rotate(
+                        angle: -14 * math.pi / 180,
+                        child: Icon(
+                          icon,
+                          size: iconSize,
+                          color: silhouetteColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
   }

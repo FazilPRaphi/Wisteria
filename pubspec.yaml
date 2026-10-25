@@ -45,6 +45,7 @@ dependencies:
   image: ^4.10.1
   pdfrx: ^2.4.8
   flutter_markdown: ^0.7.7+1
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -80,7 +81,6 @@ flutter:
     - assets/images/patient analytics.jpg
     - assets/images/medical history.jpg
     - assets/images/examination record.jpg
-    - assets/images/patients/
     - assets/logo/bglogo.png
     - assets/logo/logo.png
     - assets/logo/Frame 1.png
