@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/native.dart';
 import 'package:wisteria/core/database/database.dart';
+import 'package:wisteria/core/database/repositories/doctor_repository.dart';
 import 'package:wisteria/core/database/repositories/medical_model_repository.dart';
 import 'package:wisteria/core/database/repositories/patient_repository.dart';
 import 'package:wisteria/core/models/system_model_catalog.dart';
@@ -106,6 +107,69 @@ void main() {
     expect(find.text('New Patient'), findsOneWidget);
     expect(find.text('Registered Patients'), findsOneWidget);
     expect(find.byType(Image), findsNWidgets(2));
+
+    await db.close();
+  });
+
+  testWidgets('Workspace greeting reflects the saved doctor profile', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    final db = WisteriaDatabase(NativeDatabase.memory());
+    final repository = DoctorRepository(db);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildWisteriaTheme(brightness: Brightness.light),
+        home: Scaffold(body: MainWorkspacePanel(database: db)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome back, Doctor'), findsOneWidget);
+
+    Future<void> saveDoctorName(String name) {
+      return repository.saveProfile(id: 'local-doctor', doctorName: name);
+    }
+
+    await saveDoctorName('Dr Thomas George');
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome back, Dr Thomas'), findsOneWidget);
+
+    await saveDoctorName('Thomas George');
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome back, Dr Thomas'), findsOneWidget);
+
+    await saveDoctorName('John Mathew');
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome back, Dr John'), findsOneWidget);
+
+    await saveDoctorName('Dr John Mathew');
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome back, Dr John'), findsOneWidget);
+    expect(find.text('Welcome back, Dr Dr'), findsNothing);
+
+    await saveDoctorName('Doctor Thomas George');
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome back, Dr Thomas'), findsOneWidget);
+
+    await saveDoctorName('dr thomas george');
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome back, Dr Thomas'), findsOneWidget);
+
+    await saveDoctorName('Dr.');
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome back, Doctor'), findsOneWidget);
+
+    await saveDoctorName('Doctor');
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome back, Doctor'), findsOneWidget);
+
+    await saveDoctorName('  ');
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome back, Doctor'), findsOneWidget);
 
     await db.close();
   });

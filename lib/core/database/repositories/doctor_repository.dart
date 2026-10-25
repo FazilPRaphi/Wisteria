@@ -11,6 +11,10 @@ class DoctorRepository {
     return database.select(database.doctorProfiles).getSingleOrNull();
   }
 
+  Stream<DoctorProfile?> watchProfile() {
+    return database.select(database.doctorProfiles).watchSingleOrNull();
+  }
+
   Future<void> saveProfile({
     required String id,
     required String doctorName,
