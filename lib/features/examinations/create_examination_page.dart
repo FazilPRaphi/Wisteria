@@ -58,6 +58,7 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
   static const Map<String, String> _specialtyToModelId = {
     'Cardiology': MedicalModelRepository.bundledModelId,
     'Neurology': MedicalModelRepository.brainTumorModelId,
+    'Ophthalmology': MedicalModelRepository.diabeticRetinopathyModelId,
   };
 
   // ── Stage tracking ──
@@ -65,7 +66,9 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
   bool _examinationSaved = false;
 
   // ── Examination metadata ──
-  String get _examinationType => _isBrainTumorActive ? 'MRI' : 'Chest X-Ray';
+  String get _examinationType => _isBrainTumorActive
+      ? 'MRI'
+      : (_isDiabeticRetinopathyActive ? 'Retinal Fundus' : 'Chest X-Ray');
   static const String _previousDataRange = '6 Months';
 
   // ── Image ──
@@ -86,6 +89,7 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
   String? _inferenceError;
   PneumoniaInferenceResult? _inferenceResult;
   BrainTumorInferenceResult? _brainTumorResult;
+  DiabeticRetinopathyInferenceResult? _drResult;
 
   // ── Doctor notes ──
   final _notesController = TextEditingController();
@@ -190,6 +194,7 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
       // Reset inference if image changes
       _inferenceResult = null;
       _brainTumorResult = null;
+      _drResult = null;
       _inferenceCompleted = false;
       _inferenceError = null;
     });
@@ -205,8 +210,14 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
   bool get _isBrainTumorActive =>
       _activeModelId == MedicalModelRepository.brainTumorModelId;
 
+  /// Whether the active specialty uses the diabetic retinopathy model.
+  bool get _isDiabeticRetinopathyActive =>
+      _activeModelId == MedicalModelRepository.diabeticRetinopathyModelId;
+
   /// The image modality label for the active specialty.
-  String get _activeModality => _isBrainTumorActive ? 'MRI' : 'X-Ray';
+  String get _activeModality => _isBrainTumorActive
+      ? 'MRI'
+      : (_isDiabeticRetinopathyActive ? 'Retinal Fundus' : 'X-Ray');
 
   /// The active model's display name.
   String get _activeModelDisplayName {
@@ -227,6 +238,7 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
       _inferenceError = null;
       _inferenceResult = null;
       _brainTumorResult = null;
+      _drResult = null;
     });
 
     try {
@@ -285,6 +297,16 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
           _inferenceCompleted = true;
           _runningInference = false;
         });
+      } else if (_isDiabeticRetinopathyActive) {
+        final service = DiabeticRetinopathyInferenceService.instance;
+        await service.initialize();
+        final result = await service.analyzeImage(inferenceFile);
+        if (!mounted) return;
+        setState(() {
+          _drResult = result;
+          _inferenceCompleted = true;
+          _runningInference = false;
+        });
       } else {
         final service = OnnxInferenceService.instance;
         await service.initialize();
@@ -309,7 +331,11 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
   Future<void> _saveExamination() async {
     if (_examinationSaved) return; // Idempotent guard
     if (_draftExaminationId == null) return;
-    if (_inferenceResult == null && _brainTumorResult == null) return;
+    if (_inferenceResult == null &&
+        _brainTumorResult == null &&
+        _drResult == null) {
+      return;
+    }
 
     setState(() {
       _saving = true;
@@ -326,7 +352,9 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
               .firstOrNull ??
           (_isBrainTumorActive
               ? MedicalModelRepository.brainTumorVersionId
-              : _bundledVersionId!);
+              : (_isDiabeticRetinopathyActive
+                  ? MedicalModelRepository.diabeticRetinopathyVersionId
+                  : _bundledVersionId!));
 
       if (_brainTumorResult != null) {
         final result = _brainTumorResult!;
@@ -348,6 +376,22 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
             'notumor': result.noTumorScore,
             'pituitary': result.pituitaryScore,
           },
+        );
+      } else if (_drResult != null) {
+        final result = _drResult!;
+        await _runRepo.saveSuccessfulDiabeticRetinopathyRun(
+          runId: _uuid.v4(),
+          resultId: _uuid.v4(),
+          findingId: _uuid.v4(),
+          examinationId: _draftExaminationId!,
+          modelId: modelId,
+          modelVersionId: versionId,
+          inputImageId: _savedImageId!,
+          inputImageDate: DateTime.now(),
+          executionTimestamp: result.executedAt,
+          prediction: result.prediction,
+          confidence: result.confidence,
+          scores: result.scores,
         );
       } else {
         final result = _inferenceResult!;
@@ -460,6 +504,7 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
           _savedImagePath = null;
           _inferenceResult = null;
           _brainTumorResult = null;
+          _drResult = null;
           _inferenceCompleted = false;
           _notesController.clear();
         });
@@ -639,14 +684,18 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
       ),
       _SpecialtyCard(
         name: 'Ophthalmology',
-        subtitle: 'Eye & Vision · Coming Soon',
+        subtitle: 'Diabetic Retinopathy · Retinal Fundus',
         description:
-            'Automated retinal fundus photography and optical coherence tomography (OCT) diagnostics for diabetic retinopathy and maculopathy.',
+            'Automated ResNet-18 neural network analysis of retinal fundus photographs to classify diabetic retinopathy severity stages.',
         imagePath: 'assets/images/ophthalmology.jpg',
         icon: Icons.visibility_rounded,
         accentColor: const Color(0xFF0288D1),
-        isComingSoon: true,
-        onTap: null, // Disabled: prevents launching unavailable workflow
+        isComingSoon: false,
+        onTap: () {
+          setState(() {
+            _selectedSpecialty = 'Ophthalmology';
+          });
+        },
       ),
     ];
 
@@ -755,7 +804,8 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
                         _buildStageB(colors),
                         if (_inferenceCompleted &&
                             (_inferenceResult != null ||
-                                _brainTumorResult != null)) ...[
+                                _brainTumorResult != null ||
+                                _drResult != null)) ...[
                           const SizedBox(height: 20),
                           _buildStageC(colors),
                         ],
@@ -781,7 +831,8 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
                 _buildStageB(colors),
                 if (_inferenceCompleted &&
                     (_inferenceResult != null ||
-                        _brainTumorResult != null)) ...[
+                        _brainTumorResult != null ||
+                        _drResult != null)) ...[
                   const SizedBox(height: 20),
                   _buildStageC(colors),
                 ],
@@ -804,8 +855,6 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
   // ── Active Specialty Context Banner ──
 
   Widget _buildActiveSpecialtyHeader(WisteriaColorPalette colors) {
-    final isCardiology = _selectedSpecialty == 'Cardiology';
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -834,9 +883,11 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  isCardiology
+                  _selectedSpecialty == 'Cardiology'
                       ? 'Pneumonia Detection · Chest X-Ray Workflow'
-                      : 'Brain Tumor Detection · MRI Workflow',
+                      : (_selectedSpecialty == 'Ophthalmology'
+                          ? 'Diabetic Retinopathy · Retinal Fundus Workflow'
+                          : 'Brain Tumor Detection · MRI Workflow'),
                   style: TextStyle(fontSize: 12, color: colors.textMuted),
                 ),
               ],
@@ -861,6 +912,7 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
                       _selectedImageOriginalName = null;
                       _inferenceResult = null;
                       _brainTumorResult = null;
+                      _drResult = null;
                       _inferenceCompleted = false;
                       _inferenceError = null;
                     });
@@ -992,7 +1044,9 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
             Text(
               _isBrainTumorActive
                   ? 'Click to select a brain MRI image'
-                  : 'Click to select a chest X-ray image',
+                  : (_isDiabeticRetinopathyActive
+                      ? 'Click to select a retinal fundus image'
+                      : 'Click to select a chest X-ray image'),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -1413,6 +1467,9 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
     if (_brainTumorResult != null) {
       return _buildStageCBrainTumor(_brainTumorResult!, colors);
     }
+    if (_drResult != null) {
+      return _buildStageCDiabeticRetinopathy(_drResult!, colors);
+    }
     return _buildStageCPneumonia(_inferenceResult!, colors);
   }
 
@@ -1630,6 +1687,138 @@ class _CreateExaminationPageState extends State<CreateExaminationPage> {
         _buildResultRow(
           'Model Identifier',
           'Brain Tumor ResNet-18 (v1.0.0)',
+          colors,
+        ),
+        _buildResultRow(
+          'Execution Timestamp',
+          _formatDateTime(result.executedAt),
+          colors,
+        ),
+
+        const SizedBox(height: 12),
+        _buildAILabel(colors),
+      ],
+    );
+  }
+
+
+  Widget _buildStageCDiabeticRetinopathy(
+    DiabeticRetinopathyInferenceResult result,
+    WisteriaColorPalette colors,
+  ) {
+    final isNoDr = result.prediction == 'No_DR';
+    final classIdx = DiabeticRetinopathyInferenceService.classLabels
+        .indexOf(result.prediction);
+    final displayName = classIdx >= 0
+        ? DiabeticRetinopathyInferenceService.classDisplayNames[classIdx]
+        : result.prediction;
+    final alertColor = isNoDr ? colors.success : colors.warning;
+
+    return _buildSection(
+      number: '3',
+      title: 'AI Classification Findings',
+      icon: Icons.analytics_outlined,
+      colors: colors,
+      children: [
+        // Primary Prediction Banner
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: alertColor.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.zero,
+            border: Border.all(color: alertColor.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: alertColor.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.zero,
+                ),
+                child: Icon(
+                  isNoDr
+                      ? Icons.check_circle_outline_rounded
+                      : Icons.warning_amber_rounded,
+                  color: alertColor,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: alertColor,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Model Confidence: %',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 18),
+
+        // Multi-class probability bars for DR:
+        _buildProbabilityBar(
+          label: 'No DR',
+          percentage: result.noDrScore,
+          color: colors.success,
+          colors: colors,
+        ),
+        const SizedBox(height: 8),
+        _buildProbabilityBar(
+          label: 'Mild DR',
+          percentage: result.mildScore,
+          color: const Color(0xFF0288D1),
+          colors: colors,
+        ),
+        const SizedBox(height: 8),
+        _buildProbabilityBar(
+          label: 'Moderate DR',
+          percentage: result.moderateScore,
+          color: const Color(0xFFFB8C00),
+          colors: colors,
+        ),
+        const SizedBox(height: 8),
+        _buildProbabilityBar(
+          label: 'Severe DR',
+          percentage: result.severeScore,
+          color: const Color(0xFFE53935),
+          colors: colors,
+        ),
+        const SizedBox(height: 8),
+        _buildProbabilityBar(
+          label: 'Proliferative DR',
+          percentage: result.proliferateDrScore,
+          color: const Color(0xFFB71C1C),
+          colors: colors,
+        ),
+
+        const SizedBox(height: 16),
+
+        _buildResultRow(
+          'Model Identifier',
+          'Diabetic Retinopathy ResNet-18 (v1.0.0)',
           colors,
         ),
         _buildResultRow(

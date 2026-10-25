@@ -74,10 +74,35 @@ class SystemModelCatalog {
     isSupported: true,
   );
 
+  /// Diabetic Retinopathy ResNet18 model.
+  ///
+  /// Five-class classification of retinal fundus images.
+  /// Input: [1, 3, 224, 224] float32, RGB, ImageNet normalization.
+  /// Output: [1, 5] raw logits. Classes (alphabetical, matching training order):
+  ///   0 = Mild, 1 = Moderate, 2 = No_DR, 3 = Proliferate_DR, 4 = Severe
+  static const CatalogModel diabeticRetinopathyResNet18 = CatalogModel(
+    id: 'wisteria-diabetic-retinopathy-resnet18',
+    displayName: 'Diabetic Retinopathy — ResNet18',
+    description:
+        'Five-class diabetic retinopathy severity classification from retinal fundus images. '
+        'Classes: Mild, Moderate, No DR, Proliferative DR, Severe. Locally bundled ONNX model.',
+    task: 'DR Classification',
+    modality: 'Retinal Fundus',
+    architecture: 'ResNet-18',
+    runtime: 'ONNX Runtime',
+    inputRequirements: '224x224 RGB Retinal Fundus Image Tensor (NCHW)',
+    outputClasses: ['Mild', 'Moderate', 'No_DR', 'Proliferate_DR', 'Severe'],
+    assetPath: 'assets/models/dr_resnet18.onnx',
+    version: '1.0.0',
+    compatibility: 'Wisteria 1.0',
+    isSupported: true,
+  );
+
   /// Predefined catalog of authoritative medical AI models supported by Wisteria.
   static List<CatalogModel> get allModels => [
         pneumoniaResNet18,
         brainTumorResNet18,
+        diabeticRetinopathyResNet18,
       ];
 
   static CatalogModel? getById(String id) {

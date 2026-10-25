@@ -75,6 +75,7 @@ flutter:
     - assets/wisteria_banner.png
     - assets/models/pneumonia_resnet18.onnx
     - assets/models/brain_tumor_resnet18.onnx
+    - assets/models/dr_resnet18.onnx
     - assets/images/
     - assets/images/patient info.jpg
     - assets/images/new examination.jpg

@@ -47,6 +47,15 @@ String? _validateModality({
         'Please select an MRI image.';
   }
 
+  // Diabetic Retinopathy model accepts Retinal Fundus only.
+  if ((mod == 'retinal fundus' || mod == 'fundus') &&
+      img != 'retinal fundus' &&
+      img != 'fundus') {
+    return 'The $modelDisplayName model requires a retinal fundus image, '
+        'but the selected image has modality "$imageModality". '
+        'Please select a retinal fundus image.';
+  }
+
   return null;
 }
 
@@ -197,9 +206,18 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
           final isMri = (_medicalImages.isNotEmpty &&
                   _medicalImages.first.modality.toUpperCase() == 'MRI') ||
               _examination?.examinationType.toUpperCase() == 'MRI';
+          final isFundus = (_medicalImages.isNotEmpty &&
+                  (_medicalImages.first.modality.toUpperCase() ==
+                          'RETINAL FUNDUS' ||
+                      _medicalImages.first.modality.toUpperCase() ==
+                          'FUNDUS')) ||
+              _examination?.examinationType.toUpperCase() == 'RETINAL FUNDUS' ||
+              _examination?.examinationType.toUpperCase() == 'OPHTHALMOLOGY';
           final preferredModelId = isMri
               ? MedicalModelRepository.brainTumorModelId
-              : MedicalModelRepository.bundledModelId;
+              : (isFundus
+                  ? MedicalModelRepository.diabeticRetinopathyModelId
+                  : MedicalModelRepository.bundledModelId);
 
           final matchedChoice = choices
               .where((c) => c.model.id == preferredModelId)
@@ -276,6 +294,9 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
         await _runPneumoniaInference(image, choice);
       } else if (modelId == MedicalModelRepository.brainTumorModelId) {
         await _runBrainTumorInference(image, choice);
+      } else if (modelId ==
+          MedicalModelRepository.diabeticRetinopathyModelId) {
+        await _runDiabeticRetinopathyInference(image, choice);
       } else {
         throw UnsupportedError(
           'No inference implementation for model "$modelId". '
@@ -368,6 +389,35 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
         'notumor': result.noTumorScore,
         'pituitary': result.pituitaryScore,
       },
+    );
+  }
+
+  Future<void> _runDiabeticRetinopathyInference(
+    MedicalImage image,
+    _InstalledModelChoice choice,
+  ) async {
+    final service = DiabeticRetinopathyInferenceService.instance;
+    await service.initialize();
+
+    final result = await service.analyzeImage(File(image.filePath));
+
+    final runId = const Uuid().v4();
+    final resultId = const Uuid().v4();
+    final findingId = const Uuid().v4();
+
+    await _modelRunRepository.saveSuccessfulDiabeticRetinopathyRun(
+      runId: runId,
+      resultId: resultId,
+      findingId: findingId,
+      examinationId: widget.examinationId,
+      modelId: choice.model.id,
+      modelVersionId: choice.version.id,
+      inputImageId: image.id,
+      inputImageDate: image.clinicalDate,
+      executionTimestamp: result.executedAt,
+      prediction: result.prediction,
+      confidence: result.confidence,
+      scores: result.scores,
     );
   }
 
@@ -1800,10 +1850,17 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
 
     final isBrainTumor = rawOutput?['modelType'] == 'brain_tumor' ||
         inference.modelName.toLowerCase().contains('brain');
+    final isDiabeticRetinopathy =
+        rawOutput?['modelType'] == 'diabetic_retinopathy' ||
+            inference.modelName.toLowerCase().contains('diabetic') ||
+            inference.modelName.toLowerCase().contains('retinopathy');
 
     final isPneumonia = prediction.toUpperCase() == 'PNEUMONIA';
     final isNoTumor = prediction.toLowerCase() == 'notumor';
-    final isAlertCondition = isPneumonia || (!isNoTumor && isBrainTumor);
+    final isNoDr = prediction == 'No_DR';
+    final isAlertCondition = isPneumonia ||
+        (!isNoTumor && isBrainTumor) ||
+        (!isNoDr && isDiabeticRetinopathy);
     final alertColor = isAlertCondition ? colors.warning : colors.success;
 
     // Actual probability scores for Pneumonia
@@ -1875,7 +1932,11 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _formatPredictionLabel(prediction, isBrainTumor),
+                        _formatPredictionLabel(
+                          prediction,
+                          isBrainTumor: isBrainTumor,
+                          isDiabeticRetinopathy: isDiabeticRetinopathy,
+                        ),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -2007,6 +2068,66 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
                       label: 'No Tumor',
                       percentage: (rawOutput['notumor'] as num).toDouble(),
                       color: colors.success,
+                      colors: colors,
+                    ),
+                  ],
+                  const SizedBox(height: 14),
+                ],
+
+                // Diabetic Retinopathy Multi-Class Bars
+                if (isDiabeticRetinopathy && rawOutput != null) ...[
+                  Text(
+                    'CLASS PROBABILITIES',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: colors.textMuted,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  if (rawOutput['No_DR'] is num) ...[
+                    _buildProbabilityBar(
+                      label: 'No DR',
+                      percentage: (rawOutput['No_DR'] as num).toDouble(),
+                      color: colors.success,
+                      colors: colors,
+                    ),
+                    const SizedBox(height: 6),
+                  ],
+                  if (rawOutput['Mild'] is num) ...[
+                    _buildProbabilityBar(
+                      label: 'Mild DR',
+                      percentage: (rawOutput['Mild'] as num).toDouble(),
+                      color: const Color(0xFF0288D1),
+                      colors: colors,
+                    ),
+                    const SizedBox(height: 6),
+                  ],
+                  if (rawOutput['Moderate'] is num) ...[
+                    _buildProbabilityBar(
+                      label: 'Moderate DR',
+                      percentage: (rawOutput['Moderate'] as num).toDouble(),
+                      color: const Color(0xFFFB8C00),
+                      colors: colors,
+                    ),
+                    const SizedBox(height: 6),
+                  ],
+                  if (rawOutput['Severe'] is num) ...[
+                    _buildProbabilityBar(
+                      label: 'Severe DR',
+                      percentage: (rawOutput['Severe'] as num).toDouble(),
+                      color: const Color(0xFFE53935),
+                      colors: colors,
+                    ),
+                    const SizedBox(height: 6),
+                  ],
+                  if (rawOutput['Proliferate_DR'] is num) ...[
+                    _buildProbabilityBar(
+                      label: 'Proliferative DR',
+                      percentage:
+                          (rawOutput['Proliferate_DR'] as num).toDouble(),
+                      color: const Color(0xFFB71C1C),
                       colors: colors,
                     ),
                   ],
@@ -2526,7 +2647,28 @@ class _ExaminationDetailsPageState extends State<ExaminationDetailsPage> {
     return '$day/$month/$year • $hour:$minute $period';
   }
 
-  String _formatPredictionLabel(String prediction, bool isBrainTumor) {
+  String _formatPredictionLabel(
+    String prediction, {
+    required bool isBrainTumor,
+    required bool isDiabeticRetinopathy,
+  }) {
+    if (isDiabeticRetinopathy) {
+      switch (prediction) {
+        case 'No_DR':
+          return 'No Diabetic Retinopathy';
+        case 'Mild':
+          return 'Mild Diabetic Retinopathy';
+        case 'Moderate':
+          return 'Moderate Diabetic Retinopathy';
+        case 'Severe':
+          return 'Severe Diabetic Retinopathy';
+        case 'Proliferate_DR':
+          return 'Proliferative Diabetic Retinopathy';
+        default:
+          return prediction;
+      }
+    }
+
     if (!isBrainTumor) return prediction.toUpperCase();
 
     switch (prediction.toLowerCase()) {

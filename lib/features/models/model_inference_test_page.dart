@@ -8,7 +8,7 @@ import '../../core/services/onnx_inference_service.dart';
 import '../../core/theme/wisteria_theme.dart';
 
 /// Discriminator for which model is active in this test session.
-enum _ActiveModel { pneumonia, brainTumor }
+enum _ActiveModel { pneumonia, brainTumor, diabeticRetinopathy }
 
 /// Model-aware ONNX inference test page.
 ///
@@ -18,6 +18,7 @@ enum _ActiveModel { pneumonia, brainTumor }
 /// Supported [modelId] values:
 ///   • [MedicalModelRepository.bundledModelId]  → Pneumonia ResNet18
 ///   • [MedicalModelRepository.brainTumorModelId] → Brain Tumor ResNet18
+///   • [MedicalModelRepository.diabeticRetinopathyModelId] → Diabetic Retinopathy ResNet18
 class ModelInferenceTestPage extends StatefulWidget {
   /// The stable model ID from [MedicalModelRepository] / [SystemModelCatalog].
   final String modelId;
@@ -41,6 +42,7 @@ class _ModelInferenceTestPageState extends State<ModelInferenceTestPage> {
   // Results — exactly one will be non-null after a successful run.
   PneumoniaInferenceResult? _pneumoniaResult;
   BrainTumorInferenceResult? _brainTumorResult;
+  DiabeticRetinopathyInferenceResult? _drResult;
 
   @override
   void initState() {
@@ -48,6 +50,9 @@ class _ModelInferenceTestPageState extends State<ModelInferenceTestPage> {
     // Resolve the active model from the ID.
     if (widget.modelId == MedicalModelRepository.brainTumorModelId) {
       _model = _ActiveModel.brainTumor;
+    } else if (widget.modelId ==
+        MedicalModelRepository.diabeticRetinopathyModelId) {
+      _model = _ActiveModel.diabeticRetinopathy;
     } else {
       // Default + explicit pneumonia model ID.
       _model = _ActiveModel.pneumonia;
@@ -59,16 +64,19 @@ class _ModelInferenceTestPageState extends State<ModelInferenceTestPage> {
   String get _modelDisplayName => switch (_model) {
         _ActiveModel.pneumonia => 'Pneumonia ResNet18',
         _ActiveModel.brainTumor => 'Brain Tumor ResNet18',
+        _ActiveModel.diabeticRetinopathy => 'Diabetic Retinopathy — ResNet18',
       };
 
   String get _modalityLabel => switch (_model) {
         _ActiveModel.pneumonia => 'Chest X-ray',
         _ActiveModel.brainTumor => 'Brain MRI',
+        _ActiveModel.diabeticRetinopathy => 'Retinal Fundus',
       };
 
   String get _pickImageLabel => switch (_model) {
         _ActiveModel.pneumonia => 'Choose X-ray image',
         _ActiveModel.brainTumor => 'Choose MRI image',
+        _ActiveModel.diabeticRetinopathy => 'Choose Fundus image',
       };
 
   String get _modelDescription => switch (_model) {
@@ -80,10 +88,16 @@ class _ModelInferenceTestPageState extends State<ModelInferenceTestPage> {
           'Four-class brain tumor classification from MRI images.\n'
               'Classes: Glioma, Meningioma, No Tumor, Pituitary\n'
               'Architecture: ResNet-18 · Runtime: ONNX · v1.0.0',
+        _ActiveModel.diabeticRetinopathy =>
+          'Five-class diabetic retinopathy severity classification from retinal fundus images.\n'
+              'Classes: Mild, Moderate, No DR, Proliferative DR, Severe\n'
+              'Architecture: ResNet-18 · Runtime: ONNX · v1.0.0',
       };
 
   bool get _hasResult =>
-      _pneumoniaResult != null || _brainTumorResult != null;
+      _pneumoniaResult != null ||
+      _brainTumorResult != null ||
+      _drResult != null;
 
   // ── Actions ──
 
@@ -95,6 +109,7 @@ class _ModelInferenceTestPageState extends State<ModelInferenceTestPage> {
       _selectedImage = File(picked.path!);
       _pneumoniaResult = null;
       _brainTumorResult = null;
+      _drResult = null;
       _error = null;
     });
   }
@@ -109,6 +124,7 @@ class _ModelInferenceTestPageState extends State<ModelInferenceTestPage> {
       _error = null;
       _pneumoniaResult = null;
       _brainTumorResult = null;
+      _drResult = null;
     });
 
     try {
@@ -117,6 +133,8 @@ class _ModelInferenceTestPageState extends State<ModelInferenceTestPage> {
           await _runPneumoniaInference(image);
         case _ActiveModel.brainTumor:
           await _runBrainTumorInference(image);
+        case _ActiveModel.diabeticRetinopathy:
+          await _runDiabeticRetinopathyInference(image);
       }
     } catch (e) {
       if (!mounted) return;
@@ -151,6 +169,17 @@ class _ModelInferenceTestPageState extends State<ModelInferenceTestPage> {
     final result = await service.analyzeImage(image);
     if (!mounted) return;
     setState(() => _brainTumorResult = result);
+  }
+
+  Future<void> _runDiabeticRetinopathyInference(File image) async {
+    final service = DiabeticRetinopathyInferenceService.instance;
+    await service.initialize();
+    if (!mounted) return;
+    setState(() => _loadingModel = false);
+
+    final result = await service.analyzeImage(image);
+    if (!mounted) return;
+    setState(() => _drResult = result);
   }
 
   // ── Build ──
@@ -284,6 +313,8 @@ class _ModelInferenceTestPageState extends State<ModelInferenceTestPage> {
                   _buildPneumoniaResults(colors, _pneumoniaResult!),
                 if (_brainTumorResult != null)
                   _buildBrainTumorResults(colors, _brainTumorResult!),
+                if (_drResult != null)
+                  _buildDiabeticRetinopathyResults(colors, _drResult!),
                 const SizedBox(height: 16),
                 Text(
                   'Development test only. This output is not a validated '
@@ -502,6 +533,84 @@ class _ModelInferenceTestPageState extends State<ModelInferenceTestPage> {
             '${(result.noTumorScore * 100).toStringAsFixed(2)}%'),
         _resultRow(colors, 'Pituitary probability',
             '${(result.pituitaryScore * 100).toStringAsFixed(2)}%'),
+        _resultRow(
+            colors, 'Executed at', result.executedAt.toLocal().toString()),
+      ],
+    );
+  }
+
+
+  Widget _buildDiabeticRetinopathyResults(
+    WisteriaColorPalette colors,
+    DiabeticRetinopathyInferenceResult result,
+  ) {
+    final classIdx = DiabeticRetinopathyInferenceService.classLabels
+        .indexOf(result.prediction);
+    final displayName = classIdx >= 0
+        ? DiabeticRetinopathyInferenceService.classDisplayNames[classIdx]
+        : result.prediction;
+
+    final isNoDr = result.prediction == 'No_DR';
+    final resultColor =
+        isNoDr ? WisteriaColors.success : WisteriaColors.warning;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Prediction banner
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: resultColor.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(WisteriaRadius.sm),
+            border: Border.all(color: resultColor.withValues(alpha: 0.25)),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                isNoDr
+                    ? Icons.check_circle_outline_rounded
+                    : Icons.warning_amber_rounded,
+                color: resultColor,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    displayName,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: resultColor,
+                    ),
+                  ),
+                  Text(
+                    'Confidence: %',
+                    style: TextStyle(
+                        fontSize: 13, color: colors.textSecondary),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        _resultRow(colors, 'Predicted class', ' ()'),
+        _resultRow(colors, 'Model confidence',
+            '%'),
+        _resultRow(colors, 'Mild probability',
+            '%'),
+        _resultRow(colors, 'Moderate probability',
+            '%'),
+        _resultRow(colors, 'No DR probability',
+            '%'),
+        _resultRow(colors, 'Proliferative DR probability',
+            '%'),
+        _resultRow(colors, 'Severe probability',
+            '%'),
         _resultRow(
             colors, 'Executed at', result.executedAt.toLocal().toString()),
       ],
